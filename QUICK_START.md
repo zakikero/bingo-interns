@@ -3,6 +3,7 @@
 ## Ce qui a été fait
 
 ### 🎨 Frontend (Next.js/React)
+
 - ✅ Créé un projet Next.js 14 complet dans `/frontend`
 - ✅ Migré l'UI pastel des captures (login + board 5x5)
 - ✅ Créé `lib/api.js` - Client API pour communiquer avec FastAPI
@@ -15,6 +16,7 @@
 - ✅ Configuré `.env.local` avec `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api`
 
 ### 🔧 Backend (FastAPI)
+
 - ✅ Corrigé le fichier `app/routes/users.py` (conflit merge éliminé)
 - ✅ Nettoyé `app/main.py` - imports et middleware CORS correctement configurés
 - ✅ Endpoints déjà présents et fonctionnels:
@@ -25,17 +27,20 @@
   - Leaderboard: `GET /api/leaderboard/top`
 
 ### 📚 Documentation
+
 - ✅ Créé `INTEGRATION_GUIDE.md` - Guide complet de lancement et d'architecture
 - ✅ Créé `QUICK_START.md` - This file!
 
 ## 🚀 Checklist de lancement
 
 ### ✅ Étape 1: Vérifier les prérequis
+
 - [ ] Python 3.10+ installé
 - [ ] Node.js 18+ installé
 - [ ] PostgreSQL ou Supabase configuré
 
 ### ✅ Étape 2: Configurer le Backend
+
 ```bash
 cd backend
 
@@ -52,14 +57,17 @@ pip install -r requirements.txt
 ```
 
 ### ✅ Étape 3: Lancer le Backend
+
 ```bash
 cd backend
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
 - Vérifier: `http://localhost:8000/health` → `{"status": "healthy"}`
 - Docs: `http://localhost:8000/docs`
 
 ### ✅ Étape 4: Configurer le Frontend
+
 ```bash
 cd frontend
 
@@ -71,27 +79,30 @@ npm install
 ```
 
 ### ✅ Étape 5: Lancer le Frontend
+
 ```bash
 cd frontend
 npm run dev
 ```
+
 - Ouvrir: `http://localhost:3000`
 
 ### ✅ Étape 6: Tester le flux
+
 1. **Créer un compte**
    - Email: `test@example.com`
    - Password: `password123`
    - Clic "Sign up"
-   → User créé en DB ✓
+     → User créé en DB ✓
 
 2. **Voir le board**
    → 25 activités affichées ✓
 
 3. **Compléter une activité**
    - Clic sur une case
-   → Submission créée en DB ✓
-   → Case passe en "Done" ✓
-   → Compteur s'incrémente ✓
+     → Submission créée en DB ✓
+     → Case passe en "Done" ✓
+     → Compteur s'incrémente ✓
 
 4. **Rafraîchir la page**
    → Les données persistent (depuis la DB) ✓
@@ -148,26 +159,28 @@ curl http://localhost:8000/api/boards
 ## 📝 Variables d'environnement
 
 ### Backend (`.env`)
+
 ```
 DATABASE_URL=postgresql://user:password@localhost/bingo_db
 ```
 
 ### Frontend (`.env.local`)
+
 ```
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
 NEXT_PUBLIC_SUPABASE_URL=(optionnel)
-NEXT_PUBLIC_SUPABASE_ANON_KEY=(optionnel)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=(optionnel)
 ```
 
 ## 🐛 Dépannage
 
-| Problème | Solution |
-|----------|----------|
-| `Connection refused` sur login | Vérifier que FastAPI tourne sur port 8000 |
-| `CORS error` | Vérifier main.py a CORS activé |
+| Problème                               | Solution                                             |
+| -------------------------------------- | ---------------------------------------------------- |
+| `Connection refused` sur login         | Vérifier que FastAPI tourne sur port 8000            |
+| `CORS error`                           | Vérifier main.py a CORS activé                       |
 | `TypeError: Cannot read property 'id'` | Vérifier que .env.local a `NEXT_PUBLIC_API_BASE_URL` |
-| Database not found | Vérifier DATABASE_URL en `.env` backend |
-| Tables don't exist | Voir `backend/database_migration.sql` |
+| Database not found                     | Vérifier DATABASE_URL en `.env` backend              |
+| Tables don't exist                     | Voir `backend/database_migration.sql`                |
 
 ## 🎓 Structure des fichiers modifiés
 

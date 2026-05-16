@@ -161,7 +161,7 @@ L'app tourne sur `http://localhost:3000`
 ```
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
 NEXT_PUBLIC_SUPABASE_URL=(optionnel)
-NEXT_PUBLIC_SUPABASE_ANON_KEY=(optionnel)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=(optionnel)
 ```
 
 ### Backend (`.env`)

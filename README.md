@@ -65,7 +65,7 @@ npm run dev
 Required env files:
 
 - `backend/.env` → `DATABASE_URL=...`
-- `frontend/.env.local` → `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `frontend/.env.local` → `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 Local URLs:
 
