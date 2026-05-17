@@ -9,11 +9,11 @@
 - ✅ Créé `lib/api.js` - Client API pour communiquer avec FastAPI
 - ✅ Créé `lib/hooks.js` - Hooks React:
   - `useAuth()` - Authentification register/login/logout
-  - `useBoard()` - Récupérer un board avec ses activités
+  - `useUserBoard()` - Récupérer le board personnalisé d'un user
   - `useSubmitActivity()` - Soumettre une activité
   - `useUserSubmissions()` - Récupérer les soumissions d'un user
 - ✅ Mis à jour `app/page.js` pour intégrer les hooks
-- ✅ Configuré `.env.local` avec `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api`
+- ✅ Configuré `.env.local` avec `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
 
 ### 🔧 Backend (FastAPI)
 
@@ -95,7 +95,7 @@ npm run dev
      → User créé en DB ✓
 
 2. **Voir le board**
-   → 25 activités affichées ✓
+   → 25 activités aléatoires affichées ✓ (persistées par user)
 
 3. **Compléter une activité**
    - Clic sur une case
@@ -111,15 +111,17 @@ npm run dev
 ```
 Frontend (login form)
          ↓
-  API POST /api/users/register
+  API POST /api/auth/register
          ↓
 Backend (crée Profile en DB)
          ↓
-Frontend reçoit user.id + email
+Frontend reçoit user.id + username
          ↓
-localStorage.setItem("user_id", user.id)
+localStorage.setItem("bingo_user", user)
          ↓
-Frontend affiche le board
+Frontend appelle GET /api/users/{user_id}/board
+         ↓
+Frontend affiche le board personnalisé
          ↓
 Utilisateur clique sur une activité
          ↓
@@ -151,8 +153,8 @@ curl http://localhost:8000/api/users
 # Lister les activités
 curl http://localhost:8000/api/activities
 
-# Lister les boards
-curl http://localhost:8000/api/boards
+# Board d'un utilisateur
+curl http://localhost:8000/api/users/{user_id}/board
 ```
 
 ## 📝 Variables d'environnement
@@ -190,8 +192,7 @@ bingo-app-main 2/
 │   │   └── globals.css
 │   ├── lib/
 │   │   ├── api.js (endpoints FastAPI)
-│   │   ├── hooks.js (useAuth, useBoard, etc.)
-│   │   └── supabaseClient.js
+│   │   └── hooks.js (useAuth, useUserBoard, etc.)
 │   ├── package.json (Next.js + React 18)
 │   ├── next.config.js
 │   ├── .env.local (API URL configurée)
@@ -201,14 +202,13 @@ bingo-app-main 2/
 │   ├── app/
 │   │   ├── main.py (FastAPI + CORS fix)
 │   │   ├── routes/
-│   │   │   ├── users.py (register/get user)
-│   │   │   ├── boards.py (CRUD boards)
-│   │   │   ├── activities.py (CRUD activities + submissions)
+│   │   │   ├── users.py (auth + user board)
+│   │   │   ├── activities.py (activities + submissions)
 │   │   │   └── leaderboard.py (top users)
 │   │   ├── models/
 │   │   │   ├── user.py (Profile + auth)
 │   │   │   ├── activity.py (Activity + Submission)
-│   │   │   └── bingo_board.py (BingoBoard + UserBoardProgress)
+│   │   │   └── user_board.py (UserBoardActivity)
 │   │   └── db/
 │   │       └── connection.py (PostgreSQL/Supabase)
 │   ├── requirements.txt (FastAPI 0.109.0, SQLModel, etc.)

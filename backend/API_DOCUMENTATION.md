@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete REST API for a Bingo challenge application with image submissions, 25-box boards, and leaderboards.
+Complete REST API for a Bingo challenge application with submissions, 25-box boards, and leaderboards.
 
 **Base URL**: `http://localhost:8000`  
 **API Docs**: `http://localhost:8000/docs`
@@ -100,7 +100,7 @@ DELETE /api/activities/{activity_id}
 
 ---
 
-## 📸 Submissions (Image Proof)
+## 📸 Submissions
 
 ### Submit Activity Completion
 
@@ -113,9 +113,7 @@ POST /api/submissions
 ```json
 {
   "user_id": "uuid-here",
-  "activity_id": "uuid-here",
-  "image_url": "https://storage.example.com/image.jpg",
-  "status": "pending"
+  "activity_id": "uuid-here"
 }
 ```
 
@@ -131,21 +129,17 @@ GET /api/submissions/user/{user_id}
 GET /api/submissions/activity/{activity_id}
 ```
 
-### Approve/Reject Submission
+---
+
+## 🎲 User Board (25 Boxes)
+
+### Get User Board
 
 ```http
-PATCH /api/submissions/{submission_id}/status
+GET /api/users/{user_id}/board
 ```
 
-**Request Body:**
-
-```json
-{
-  "status": "approved" // or "rejected" or "pending"
-}
-```
-
----
+**Response:** ordered list of 25 activities for the user. The first call generates the board.
 
 ---
 
@@ -171,12 +165,6 @@ GET /api/leaderboard/top?limit=5
 ]
 ```
 
-### Get Board-Specific Leaderboard
-
-```http
-GET /api/leaderboard/board/{board_id}?limit=5
-```
-
 ### Get User Statistics
 
 ```http
@@ -189,10 +177,7 @@ GET /api/stats/user/{user_id}
 {
   "user_id": "uuid",
   "username": "user123",
-  "completed_activities": 18,
-  "approved_submissions": 18,
-  "pending_submissions": 3,
-  "rejected_submissions": 2
+  "completed_activities": 18
 }
 ```
 
@@ -208,11 +193,7 @@ GET /api/stats/global
 {
   "total_users": 156,
   "total_activities": 50,
-  "total_boards": 3,
-  "active_boards": 2,
-  "total_submissions": 523,
-  "approved_submissions": 412,
-  "pending_submissions": 111
+  "total_submissions": 523
 }
 ```
 

@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+from sqlalchemy import func
 from app.models.user import Profile, UserRegister, UserLogin, UserResponse
+from app.models.activity import Activity, ActivityResponse
+from app.models.user_board import UserBoardActivity
 from app.db.connection import get_session
 import uuid as uuid_pkg
 import base64
@@ -168,3 +171,61 @@ def list_users(
     """List users (paginated)"""
     users = session.exec(select(Profile).offset(skip).limit(limit)).all()
     return users
+
+
+@router.get(
+    "/users/{user_id}/board",
+    response_model=list[ActivityResponse],
+    summary="Get user's bingo board",
+    description=(
+        "Returns the user's persisted 25-activity board. "
+        "If the user has no board yet, a random set of 25 activities is generated and stored."
+    ),
+    response_description="Ordered list of 25 activities for the user's board",
+    responses={
+        200: {"description": "Board returned"},
+        400: {"description": "Not enough activities to generate a board"},
+        404: {"description": "User not found"},
+    },
+)
+def get_user_board(user_id: uuid_pkg.UUID, session: Session = Depends(get_session)):
+    user = session.get(Profile, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    existing = session.exec(
+        select(UserBoardActivity)
+        .where(UserBoardActivity.user_id == user_id)
+        .order_by(UserBoardActivity.position)
+    ).all()
+
+    if not existing:
+        activities = session.exec(
+            select(Activity).order_by(func.random()).limit(25)
+        ).all()
+        if len(activities) < 25:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="At least 25 activities are required to generate a board",
+            )
+
+        for position, activity in enumerate(activities):
+            session.add(
+                UserBoardActivity(
+                    user_id=user_id,
+                    activity_id=activity.id,
+                    position=position,
+                )
+            )
+        session.commit()
+
+    statement = (
+        select(Activity)
+        .join(UserBoardActivity, Activity.id == UserBoardActivity.activity_id)
+        .where(UserBoardActivity.user_id == user_id)
+        .order_by(UserBoardActivity.position)
+    )
+    return session.exec(statement).all()

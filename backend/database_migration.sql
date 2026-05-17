@@ -1,6 +1,8 @@
 -- Bingo App Database Schema
 -- Run this SQL in your Supabase SQL Editor to create the new tables
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 -- ============================================
 -- UPDATE PROFILES TABLE FOR USERNAME AUTH
 -- ============================================
@@ -18,6 +20,21 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_username_unique ON profiles(usern
 -- CREATE INDEXES FOR PERFORMANCE
 -- ============================================
 CREATE INDEX IF NOT EXISTS idx_submissions_user_activity ON submissions(user_id, activity_id);
+
+-- ============================================
+-- CREATE USER BOARD ACTIVITIES TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS user_board_activities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+    position INTEGER NOT NULL CHECK (position >= 0 AND position < 25),
+    UNIQUE(user_id, position),
+    UNIQUE(user_id, activity_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_board_activities_user ON user_board_activities(user_id);
 
 -- Performance indexes for activities table
 CREATE INDEX IF NOT EXISTS idx_activities_index ON activities(index) WHERE index IS NOT NULL;

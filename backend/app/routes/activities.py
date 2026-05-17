@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session, select, col
-from sqlalchemy import text as sa_text
+from sqlmodel import Session, select
 from app.models.activity import (
     Activity, ActivityCreate, ActivityResponse,
     Submission, SubmissionCreate, SubmissionResponse
@@ -27,36 +26,13 @@ class ActivityUpdate(BaseModel):
     response_model=List[ActivityResponse],
     summary="List bingo board activities",
     description=(
-        "Returns up to **25** activities — one per bingo-board position (0-24).\n\n"
-        "When multiple activities share the same `index`, the most recently created one wins. "
-        "Activities whose `index` is `null` are excluded from the result. "
-        "The response list is sorted by `index` ascending."
+        "Returns all activities available for board generation."
     ),
-    response_description="Ordered list of up to 25 unique activities",
+    response_description="List of activities",
 )
 def get_activities(session: Session = Depends(get_session)):
-    # Use PostgreSQL DISTINCT ON to do the deduplication in SQL
-    # instead of fetching all rows and filtering in Python
-    statement = sa_text(
-        "SELECT DISTINCT ON (index) id, created_at, title, description, "
-        '"isImageRequired", index '
-        "FROM activities "
-        "WHERE index IS NOT NULL "
-        "ORDER BY index ASC, created_at DESC "
-        "LIMIT 25"
-    )
-    rows = session.exec(statement).all()
-    return [
-        ActivityResponse(
-            id=row.id,
-            created_at=row.created_at,
-            title=row.title,
-            description=row.description,
-            isImageRequired=row.isImageRequired,
-            index=row.index,
-        )
-        for row in rows
-    ]
+    statement = select(Activity).order_by(Activity.created_at.desc())
+    return session.exec(statement).all()
 
 
 @router.get(
@@ -89,7 +65,7 @@ def get_activity(activity_id: uuid_pkg.UUID, session: Session = Depends(get_sess
     status_code=status.HTTP_201_CREATED,
     summary="Submit activity proof",
     description=(
-        "Record that a user has completed a bingo activity by providing an image URL as proof.\n\n"
+        "Record that a user has completed a bingo activity.\n\n"
         "**Validation rules**:\n"
         "- The `user_id` must reference an existing profile.\n"
         "- The `activity_id` must reference an existing activity.\n"

@@ -3,9 +3,8 @@
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js_14-000000?logo=next.js)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
-![Supabase](https://img.shields.io/badge/Auth%20%26%20Storage-Supabase-3ECF8E?logo=supabase)
 
-**Internship Bingo** transforms intern onboarding into a gamified challenge: complete activities on a 5×5 board, submit proof, and climb the leaderboard.
+**Internship Bingo** transforms intern onboarding into a gamified challenge: complete activities on a 5×5 board per user (randomized on first login), submit proof, and climb the leaderboard.
 
 ## 🚀 Snapshot
 
@@ -15,9 +14,9 @@
 
 ## 🧩 Key features
 
-- 25-cell interactive bingo board with progress tracking
+- 25-cell interactive bingo board per user (randomized on first login)
 - Authentication flow (signup, login)
-- Activity submissions with optional image upload
+- Activity submissions
 - Leaderboard ranking by completed activities
 - Documented backend API (`/docs`) + health check endpoint
 
@@ -26,7 +25,7 @@
 ```text
 Next.js UI  →  FastAPI API  →  PostgreSQL
                  │
-                 └── Supabase Storage (images)
+                 └── None
 ```
 
 ## 🛠️ Tech stack
@@ -36,15 +35,10 @@ Next.js UI  →  FastAPI API  →  PostgreSQL
 | Frontend          | Next.js 14, React 18, TypeScript   |
 | Backend           | FastAPI, Python, SQLModel, Uvicorn |
 | Data              | PostgreSQL, psycopg                |
-| Platform services | Supabase Storage                   |
+| Platform services | None                               |
 | API docs          | OpenAPI / Swagger                  |
 
 ## 💼 What this demonstrates
-
-- End-to-end delivery across frontend, backend, and database
-- API design, validation, and route modularity
-- Async state handling and optimistic UI updates
-- Third-party integration in production-style architecture
 
 ## ⚡ Quick run
 

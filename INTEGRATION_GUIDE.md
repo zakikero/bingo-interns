@@ -25,10 +25,9 @@ Frontend (Next.js/React) ← API Calls → Backend (FastAPI)
 
 - `app/main.py` - Serveur FastAPI principal
 - `app/routes/users.py` - Endpoints auth (register, login, get user)
-- `app/routes/boards.py` - Endpoints bingo board
 - `app/routes/activities.py` - Endpoints activités et submissions
 - `app/routes/leaderboard.py` - Endpoints classement
-- `app/models/` - Modèles SQLModel (User, Activity, BingoBoard, etc.)
+- `app/models/` - Modèles SQLModel (User, Activity, UserBoardActivity)
 - `app/db/connection.py` - Connexion PostgreSQL
 - `requirements.txt` - Dépendances Python
 
@@ -85,7 +84,7 @@ cd frontend
 npm install
 
 # Les variables d'environnement sont déjà configurées en .env.local
-# (API pointe sur http://localhost:8000/api)
+# (API pointe sur http://localhost:8000)
 
 # Lancer le serveur de développement
 npm run dev
@@ -105,7 +104,7 @@ L'app tourne sur `http://localhost:3000`
 
 ### 2. **Voir le Board**
 
-- Frontend récupère le board depuis `/api/boards/{boardId}`
+- Frontend récupère le board depuis `/api/users/{user_id}/board`
 - Les 25 activités sont affichées avec symbole `Open`
 
 ### 3. **Compléter une activité**
@@ -129,11 +128,11 @@ L'app tourne sur `http://localhost:3000`
 
 ### Users
 
-- `POST /api/users/register` - Créer un utilisateur
+- `POST /api/auth/register` - Créer un utilisateur
+- `POST /api/auth/login` - Se connecter
 - `GET /api/users/{user_id}` - Récupérer un utilisateur
 - `GET /api/users` - Lister tous les utilisateurs
-
-### Boards
+- `GET /api/users/{user_id}/board` - Récupérer le board personnalisé
 
 ### Activities
 
@@ -143,7 +142,7 @@ L'app tourne sur `http://localhost:3000`
 ### Submissions
 
 - `POST /api/submissions` - Soumettre une preuve pour une activité
-- `GET /api/submissions?user_id=...` - Récupérer les soumissions d'un user
+- `GET /api/submissions/user/{user_id}` - Récupérer les soumissions d'un user
 
 ### Leaderboard
 
@@ -190,7 +189,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 
 ## Prochaines étapes
 
-1. **Upload d'images** - Intégrer Supabase Storage pour `image_url`
+1. **Upload d'images** - Ajouter un stockage externe si nécessaire
 2. **Authentification robuste** - Ajouter JWT tokens
 3. **Validation des soumissions** - Créer panel admin pour approuver/rejeter
 4. **Classement en direct** - Sync du leaderboard en temps réel

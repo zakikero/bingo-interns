@@ -6,9 +6,8 @@ import {
   useSubmitActivity,
   useUserSubmissions,
   useAuth,
-  useActivities,
+  useUserBoard,
 } from "@/lib/hooks";
-import { FALLBACK_TASKS } from "@/constants/tasks";
 import BingoCell from "./BingoCell";
 import ActivityModal from "./ActivityModal";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -21,11 +20,11 @@ export default function BingoBoard() {
     user?.id ?? null,
   );
   const {
-    activities,
-    loading: activitiesLoading,
-    error: activitiesError,
-    refetch: refetchActivities,
-  } = useActivities();
+    activities: boardActivities,
+    loading: boardLoading,
+    error: boardError,
+    refetch: refetchBoard,
+  } = useUserBoard(user?.id ?? null);
 
   const [error, setError] = useState<string | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
@@ -34,12 +33,12 @@ export default function BingoBoard() {
   // Optimistic set – instantly mark cells green before server round-trip confirms
   const [optimisticIds, setOptimisticIds] = useState<Set<string>>(new Set());
 
-  const displayActivities = activities.length > 0 ? activities : FALLBACK_TASKS;
+  const displayActivities = boardActivities;
 
   // Surface API errors as a toast
   useEffect(() => {
-    if (activitiesError) setError(activitiesError);
-  }, [activitiesError]);
+    if (boardError) setError(boardError);
+  }, [boardError]);
 
   // Auto-dismiss error toast after 4 s
   useEffect(() => {
@@ -96,7 +95,7 @@ export default function BingoBoard() {
       try {
         await submit(user.id, activityId);
         refetchSubmissions();
-        refetchActivities();
+        refetchBoard();
         window.dispatchEvent(new Event("submission-completed"));
       } catch (err) {
         setOptimisticIds((prev) => {
@@ -107,7 +106,7 @@ export default function BingoBoard() {
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     },
-    [user, submit, refetchSubmissions, refetchActivities],
+    [user, submit, refetchSubmissions, refetchBoard],
   );
 
   return (
@@ -158,8 +157,10 @@ export default function BingoBoard() {
       </div>
 
       {/* Grid */}
-      {activitiesLoading ? (
+      {boardLoading ? (
         <LoadingSpinner message="Loading activities…" size="lg" />
+      ) : displayActivities.length === 0 ? (
+        <p className="leaderboard-empty">No activities available.</p>
       ) : (
         <div className="board-grid">
           {displayActivities.map((activity) => (
