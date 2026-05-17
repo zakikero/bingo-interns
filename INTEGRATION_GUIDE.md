@@ -24,7 +24,7 @@ Frontend (Next.js/React) ← API Calls → Backend (FastAPI)
 ### Backend (`/backend`)
 
 - `app/main.py` - Serveur FastAPI principal
-- `app/routes/users.py` - Endpoints auth (register, get user)
+- `app/routes/users.py` - Endpoints auth (register, login, get user)
 - `app/routes/boards.py` - Endpoints bingo board
 - `app/routes/activities.py` - Endpoints activités et submissions
 - `app/routes/leaderboard.py` - Endpoints classement
@@ -97,9 +97,9 @@ L'app tourne sur `http://localhost:3000`
 
 ### 1. **Register / Login**
 
-- L'utilisateur entre email/password
-- Appel API `POST /api/users/register`
-- Backend crée ou valide l'utilisateur en DB
+- L'utilisateur entre username/password
+- Appel API `POST /api/auth/register`
+- Backend crée l'utilisateur en DB
 - Frontend stocke `user.id` en localStorage
 - Redirection vers le board
 
@@ -135,10 +135,6 @@ L'app tourne sur `http://localhost:3000`
 
 ### Boards
 
-- `GET /api/boards` - Lister les boards
-- `GET /api/boards/{board_id}` - Récupérer un board avec ses activités
-- `POST /api/boards` - Créer un board (25 activités)
-
 ### Activities
 
 - `GET /api/activities` - Lister les activités
@@ -159,9 +155,7 @@ L'app tourne sur `http://localhost:3000`
 ### Frontend (`.env.local`)
 
 ```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
-NEXT_PUBLIC_SUPABASE_URL=(optionnel)
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=(optionnel)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ### Backend (`.env`)
@@ -182,7 +176,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 ### "CORS error" au login
 
 - S'assurer que le backend a CORS activé (activé par défaut dans main.py)
-- Vérifier que le Frontend appelle `http://localhost:8000/api`
+- Vérifier que le Frontend appelle `http://localhost:8000`
 
 ### "Database connection error"
 

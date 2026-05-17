@@ -1,138 +1,42 @@
 /**
  * lib/api/auth.ts
  *
- * Auth functions powered by Supabase Auth.
- * No more manual localStorage or custom backend /login endpoints.
+ * Auth functions backed by the FastAPI username/password endpoints.
  */
 
-import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@/types";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-/** Map a Supabase user object to our app's User shape */
-function toAppUser(su: SupabaseUser): User {
-  return {
-    id: su.id,
-    email: su.email ?? "",
-    name: (su.user_metadata?.name as string) ?? undefined,
-  };
-}
+async function requestAuth<T>(path: string, body: object): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-function requireClient() {
-  if (!supabase) throw new Error("Supabase client is not configured");
-  return supabase;
-}
-
-/** Sync the user profile (id, email, name) to the backend */
-async function syncProfileToBackend(user: User): Promise<void> {
-  try {
-    await fetch(`${API_BASE_URL}/api/users/sync`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: user.id,
-        email: user.email,
-        name: user.name ?? null,
-      }),
-    });
-  } catch {
-    // best-effort — don't block auth flow if backend is unreachable
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || "Authentication failed");
   }
+
+  return response.json();
 }
 
 export async function registerUser(
-  email: string,
+  username: string,
   password: string,
-  name?: string,
 ): Promise<User> {
-  const client = requireClient();
-
-  if (name) {
-    const checkRes = await fetch(
-      `${API_BASE_URL}/api/users/check-name?name=${encodeURIComponent(name)}`,
-    );
-    if (checkRes.ok) {
-      const { available } = await checkRes.json();
-      if (!available) {
-        throw new Error(
-          "This name is already taken. Please choose a different name.",
-        );
-      }
-    }
-  }
-
-  const { data, error } = await client.auth.signUp({
-    email,
-    password,
-    options: { data: { name } },
-  });
-
-  if (error) throw new Error(error.message);
-  if (!data.user) throw new Error("Registration failed — no user returned");
-
-  const user = toAppUser(data.user);
-
-  // Sync profile (including name) to the backend
-  await syncProfileToBackend(user);
-
-  return user;
+  return requestAuth<User>("/api/auth/register", { username, password });
 }
 
 export async function loginUser(
-  email: string,
+  username: string,
   password: string,
 ): Promise<User> {
-  const client = requireClient();
-  const { data, error } = await client.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) throw new Error(error.message);
-  if (!data.user) throw new Error("Login failed — no user returned");
-
-  const user = toAppUser(data.user);
-
-  // Sync profile to the backend
-  await syncProfileToBackend(user);
-
-  return user;
+  return requestAuth<User>("/api/auth/login", { username, password });
 }
 
 export async function logoutUser(): Promise<void> {
-  const client = requireClient();
-  const { error } = await client.auth.signOut();
-  if (error) throw new Error(error.message);
-}
-
-/** Send a password-reset email via Supabase */
-export async function resetPassword(email: string): Promise<void> {
-  const client = requireClient();
-  const { error } = await client.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password`,
-  });
-  if (error) throw new Error(error.message);
-}
-
-/** Update the user's password (called after clicking the reset link) */
-export async function updatePassword(newPassword: string): Promise<void> {
-  const client = requireClient();
-  const { error } = await client.auth.updateUser({ password: newPassword });
-  if (error) throw new Error(error.message);
-}
-
-/** Get the current session's access token (for backend API calls) */
-export async function getAuthToken(): Promise<string | null> {
-  const client = requireClient();
-  const { data } = await client.auth.getSession();
-  return data.session?.access_token ?? null;
-}
-
-/** Get the current user's ID from the active session */
-export async function getUserId(): Promise<string | null> {
-  const client = requireClient();
-  const { data } = await client.auth.getUser();
-  return data.user?.id ?? null;
+  // No server-side session yet. Client clears local state.
 }

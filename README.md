@@ -16,7 +16,7 @@
 ## 🧩 Key features
 
 - 25-cell interactive bingo board with progress tracking
-- Authentication flow (signup, login, reset password)
+- Authentication flow (signup, login)
 - Activity submissions with optional image upload
 - Leaderboard ranking by completed activities
 - Documented backend API (`/docs`) + health check endpoint
@@ -25,8 +25,8 @@
 
 ```text
 Next.js UI  →  FastAPI API  →  PostgreSQL
-                  │
-                  └── Supabase Auth + Storage
+                 │
+                 └── Supabase Storage (images)
 ```
 
 ## 🛠️ Tech stack
@@ -36,7 +36,7 @@ Next.js UI  →  FastAPI API  →  PostgreSQL
 | Frontend          | Next.js 14, React 18, TypeScript   |
 | Backend           | FastAPI, Python, SQLModel, Uvicorn |
 | Data              | PostgreSQL, psycopg                |
-| Platform services | Supabase Auth, Supabase Storage    |
+| Platform services | Supabase Storage                   |
 | API docs          | OpenAPI / Swagger                  |
 
 ## 💼 What this demonstrates
@@ -65,7 +65,7 @@ npm run dev
 Required env files:
 
 - `backend/.env` → `DATABASE_URL=...`
-- `frontend/.env.local` → `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `frontend/.env.local` → `NEXT_PUBLIC_API_BASE_URL`
 
 Local URLs:
 

@@ -94,12 +94,6 @@ export default function BingoBoard() {
       setOptimisticIds((prev) => new Set(prev).add(activityId));
 
       try {
-        if (image) {
-          const { uploadSubmissionImage } =
-            await import("@/lib/api/submissions");
-          await uploadSubmissionImage(user.id, activityId, image);
-        }
-
         await submit(user.id, activityId);
         refetchSubmissions();
         refetchActivities();
@@ -153,7 +147,9 @@ export default function BingoBoard() {
         <div>
           <p className="eyebrow">GLOW BINGO</p>
           <h2>
-            {user?.name ? `${user.name}'s Activity Board` : "My Activity Board"}
+            {user?.username
+              ? `${user.username}'s Activity Board`
+              : "My Activity Board"}
           </h2>
         </div>
         <div className="progress-pill progress-pill-compact">

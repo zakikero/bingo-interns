@@ -20,9 +20,8 @@ tags_metadata = [
     {
         "name": "users",
         "description": (
-            "Operations related to user profiles. "
-            "Handles synchronisation of Supabase-authenticated users into backend tables "
-            "and retrieval of profile information."
+            "Operations related to user profiles and authentication. "
+            "Handles username-based registration/login and profile retrieval."
         ),
     },
     {
@@ -49,7 +48,7 @@ app = FastAPI(
         "## Bingo Challenge Game API\n\n"
         "Backend REST API powering the Bingo intern challenge game.\n\n"
         "### Features\n"
-        "- **User sync** – keeps backend profiles in sync with Supabase Auth\n"
+        "- **Auth** – username/password registration and login\n"
         "- **Activities** – 25-cell bingo board challenges\n"
         "- **Submissions** – image-proof submissions for completed activities\n"
         "- **Leaderboard** – real-time ranking by completed activities and per-board rankings\n\n"

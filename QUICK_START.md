@@ -20,8 +20,7 @@
 - ✅ Corrigé le fichier `app/routes/users.py` (conflit merge éliminé)
 - ✅ Nettoyé `app/main.py` - imports et middleware CORS correctement configurés
 - ✅ Endpoints déjà présents et fonctionnels:
-  - Auth: `POST /api/users/register`, `GET /api/users/{user_id}`
-  - Boards: `GET /api/boards`, `GET /api/boards/{board_id}`
+  - Auth: `POST /api/auth/register`, `POST /api/auth/login`
   - Activities: `GET /api/activities`, `POST /api/activities`
   - Submissions: `POST /api/submissions`, `GET /api/submissions/user/{user_id}`
   - Leaderboard: `GET /api/leaderboard/top`
@@ -90,7 +89,7 @@ npm run dev
 ### ✅ Étape 6: Tester le flux
 
 1. **Créer un compte**
-   - Email: `test@example.com`
+   - Username: `testuser`
    - Password: `password123`
    - Clic "Sign up"
      → User créé en DB ✓
@@ -142,9 +141,9 @@ Case affichée en "Done"
 curl http://localhost:8000/health
 
 # Créer un utilisateur
-curl -X POST http://localhost:8000/api/users/register \
+curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass123"}'
+  -d '{"username":"testuser","password":"pass123"}'
 
 # Lister les utilisateurs
 curl http://localhost:8000/api/users
@@ -167,9 +166,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 ### Frontend (`.env.local`)
 
 ```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
-NEXT_PUBLIC_SUPABASE_URL=(optionnel)
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=(optionnel)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ## 🐛 Dépannage

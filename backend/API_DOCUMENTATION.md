@@ -11,18 +11,33 @@ Complete REST API for a Bingo challenge application with image submissions, 25-b
 
 ## 🔐 User Management
 
-### Sync Supabase User Profile
+### Register
 
 ```http
-POST /api/users/sync
+POST /api/auth/register
 ```
 
 **Request Body:**
 
 ```json
 {
-  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "email": "user@example.com"
+  "username": "user123",
+  "password": "password123"
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+```
+
+**Request Body:**
+
+```json
+{
+  "username": "user123",
+  "password": "password123"
 }
 ```
 
@@ -132,77 +147,6 @@ PATCH /api/submissions/{submission_id}/status
 
 ---
 
-## 🎲 Bingo Boards (25 Boxes)
-
-### Create Bingo Board
-
-```http
-POST /api/boards
-```
-
-**Request Body:**
-
-```json
-{
-  "title": "Summer Challenge 2026",
-  "description": "Complete all 25 summer activities!",
-  "activity_ids": [
-    "uuid1", "uuid2", "uuid3", ..., "uuid25"
-  ]
-}
-```
-
-**Note:** Must provide exactly 25 activity IDs
-
-### Get All Boards
-
-```http
-GET /api/boards?active_only=true
-```
-
-### Get Board with Activities
-
-```http
-GET /api/boards/{board_id}
-```
-
-**Response includes activities in order (positions 0-24)**
-
-### Get User Progress on Board
-
-```http
-GET /api/boards/{board_id}/progress/{user_id}
-```
-
-**Response:**
-
-```json
-{
-  "board_id": "uuid",
-  "board_title": "Summer Challenge 2026",
-  "total_activities": 25,
-  "completed_activities": 8,
-  "completed_positions": [0, 3, 5, 7, 12, 15, 18, 22]
-}
-```
-
-### Mark Activity Complete on Board
-
-```http
-POST /api/boards/{board_id}/complete?user_id={user_id}&activity_id={activity_id}&submission_id={submission_id}
-```
-
-**Requirements:**
-
-- Submission must exist and be approved
-- Links user's approved submission to board progress
-
-### Activate/Deactivate Board
-
-```http
-PATCH /api/boards/{board_id}?is_active=false
-```
-
 ---
 
 ## 🏆 Leaderboard & Statistics
@@ -219,7 +163,7 @@ GET /api/leaderboard/top?limit=5
 [
   {
     "user_id": "uuid",
-    "email": "user@example.com",
+    "username": "user123",
     "completed_activities": 32,
     "rank": 1
   },
@@ -244,7 +188,7 @@ GET /api/stats/user/{user_id}
 ```json
 {
   "user_id": "uuid",
-  "email": "user@example.com",
+  "username": "user123",
   "completed_activities": 18,
   "approved_submissions": 18,
   "pending_submissions": 3,

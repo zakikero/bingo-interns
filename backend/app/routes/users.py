@@ -1,82 +1,132 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from app.models.user import Profile, UserSync, UserResponse
+from app.models.user import Profile, UserRegister, UserLogin, UserResponse
 from app.db.connection import get_session
 import uuid as uuid_pkg
+import base64
+import hashlib
+import hmac
+import secrets
 
 router = APIRouter()
 
+_PBKDF2_ROUNDS = 120_000
+
+
+def _hash_password(password: str) -> str:
+    salt = secrets.token_bytes(16)
+    derived = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        _PBKDF2_ROUNDS,
+    )
+    return f"{base64.b64encode(salt).decode()}.{base64.b64encode(derived).decode()}"
+
+
+def _verify_password(password: str, stored_hash: str) -> bool:
+    try:
+        salt_b64, derived_b64 = stored_hash.split(".", 1)
+        salt = base64.b64decode(salt_b64)
+        derived = base64.b64decode(derived_b64)
+    except Exception:
+        return False
+
+    check = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        _PBKDF2_ROUNDS,
+    )
+    return hmac.compare_digest(check, derived)
+
 
 @router.post(
-    "/users/sync",
+    "/auth/register",
     response_model=UserResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Sync user profile",
-    description=(
-        "Upserts a profile row for a Supabase-authenticated user.\n\n"
-        "Call this immediately after Supabase sign-up or sign-in so that all "
-        "backend tables that reference `profiles.id` remain consistent.\n\n"
-        "- If the profile already exists by `id`, the email and name are updated if changed.\n"
-        "- If the `id` is new but the email belongs to a different profile, a **409** is returned."
-    ),
-    response_description="The created or updated user profile",
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user",
+    description="Create a new user with a username and password.",
+    response_description="The created user profile",
     responses={
-        200: {"description": "Profile already existed and was returned (or updated)"},
-        409: {"description": "Email already registered to a different user ID"},
+        201: {"description": "User registered"},
+        409: {"description": "Username already exists"},
     },
 )
-def sync_user_profile(user_data: UserSync, session: Session = Depends(get_session)):
-    existing_by_id = session.get(Profile, user_data.id)
-    if existing_by_id:
-        changed = False
-        if existing_by_id.email != user_data.email:
-            existing_by_id.email = user_data.email
-            changed = True
-        if user_data.name is not None and existing_by_id.name != user_data.name:
-            existing_by_id.name = user_data.name
-            changed = True
-        if changed:
-            session.commit()
-            session.refresh(existing_by_id)
-        return existing_by_id
-
-    existing_by_email = session.exec(
-        select(Profile).where(Profile.email == user_data.email)
-    ).first()
-    if existing_by_email and existing_by_email.id != user_data.id:
+def register_user(user_data: UserRegister, session: Session = Depends(get_session)):
+    username = user_data.username.strip()
+    if not username:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already exists for another profile",
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Username is required",
+        )
+    if len(user_data.password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Password must be at least 6 characters",
         )
 
-    if user_data.name is not None:
-        existing_by_name = session.exec(
-            select(Profile).where(Profile.name == user_data.name)
-        ).first()
-        if existing_by_name and existing_by_name.id != user_data.id:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Name already taken",
-            )
+    existing = session.exec(
+        select(Profile).where(Profile.username == username)
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already exists",
+        )
 
-    new_profile = Profile(id=user_data.id, email=user_data.email, name=user_data.name)
+    new_profile = Profile(
+        username=username,
+        password_hash=_hash_password(user_data.password),
+    )
     session.add(new_profile)
     session.commit()
     session.refresh(new_profile)
     return new_profile
 
 
+@router.post(
+    "/auth/login",
+    response_model=UserResponse,
+    summary="Login",
+    description="Login using a username and password.",
+    response_description="The authenticated user profile",
+    responses={
+        200: {"description": "Login successful"},
+        401: {"description": "Invalid username or password"},
+    },
+)
+def login_user(user_data: UserLogin, session: Session = Depends(get_session)):
+    username = user_data.username.strip()
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Username is required",
+        )
+
+    user = session.exec(
+        select(Profile).where(Profile.username == username)
+    ).first()
+    if not user or not _verify_password(user_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+        )
+
+    return user
+
+
 @router.get(
-    "/users/check-name",
-    summary="Check name availability",
-    description="Returns whether the given display name is available (not yet used by any profile).",
+    "/users/check-username",
+    summary="Check username availability",
+    description="Returns whether the given username is available (not yet used by any profile).",
     responses={
         200: {"description": "Availability status"},
     },
 )
-def check_name_availability(name: str, session: Session = Depends(get_session)):
+def check_username_availability(username: str, session: Session = Depends(get_session)):
     existing = session.exec(
-        select(Profile).where(Profile.name == name)
+        select(Profile).where(Profile.username == username)
     ).first()
     return {"available": existing is None}
 
