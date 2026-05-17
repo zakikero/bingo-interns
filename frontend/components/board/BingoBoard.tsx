@@ -93,6 +93,12 @@ export default function BingoBoard() {
       setOptimisticIds((prev) => new Set(prev).add(activityId));
 
       try {
+        if (image) {
+          const { uploadSubmissionImage } =
+            await import("@/lib/api/submissions");
+          await uploadSubmissionImage(user.id, activityId, image);
+        }
+
         await submit(user.id, activityId);
         refetchSubmissions();
         refetchBoard();
