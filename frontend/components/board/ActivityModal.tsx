@@ -10,11 +10,7 @@ interface ActivityModalProps {
   onClose: () => void;
 }
 
-export default function ActivityModal({
-  activity,
-  onSubmit,
-  onClose,
-}: ActivityModalProps) {
+export default function ActivityModal({ activity, onSubmit, onClose }: ActivityModalProps) {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,11 +79,7 @@ export default function ActivityModal({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{activity.title}</h2>
-          <button
-            className="modal-close-btn"
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <button className="modal-close-btn" onClick={onClose} aria-label="Close">
             ×
           </button>
         </div>
@@ -101,7 +93,7 @@ export default function ActivityModal({
           {activity.isImageRequired && (
             <div className="modal-field">
               <label htmlFor="activity-image">
-                Upload image <span className="modal-required">*optionnal</span>
+                Upload image <span className="modal-required">*optional</span>
               </label>
               <div
                 className={`modal-file-zone${dragging ? " drag-over" : ""}`}
@@ -112,11 +104,7 @@ export default function ActivityModal({
               >
                 {preview ? (
                   <div className="modal-preview-wrapper">
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="modal-preview-img"
-                    />
+                    <img src={preview} alt="Preview" className="modal-preview-img" />
                     <button
                       type="button"
                       className="modal-preview-remove"
@@ -146,11 +134,7 @@ export default function ActivityModal({
             </div>
           )}
 
-          <button
-            className="btn btn-primary modal-submit-btn"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="btn btn-primary modal-submit-btn" type="submit" disabled={loading}>
             {loading ? "Submitting…" : "Complete Activity"}
           </button>
         </form>
