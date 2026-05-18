@@ -111,7 +111,7 @@ body {
 .eyebrow {
   margin: 0;
   color: var(--brand-red);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -341,6 +341,13 @@ input:focus {
   padding: 18px 18px 18px;
 }
 
+/* Main bingo board: slightly smaller than other cards (~50px) */
+.board-card-main {
+  max-width: 670px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .board-header {
   display: flex;
   justify-content: space-between;
@@ -350,7 +357,7 @@ input:focus {
 
 .board-header h2 {
   margin: 2px 0 0;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 500;
   color: var(--muted);
 }
@@ -452,6 +459,10 @@ input:focus {
     width: min(100%, 680px);
   }
 
+  .board-card-main {
+    max-width: 630px;
+  }
+
   .progress-pill {
     font-size: 22px;
   }
@@ -474,6 +485,14 @@ input:focus {
 
   .progress-pill {
     font-size: 20px;
+  }
+
+  .board-header h2 {
+    font-size: 24px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
   }
 }
 
