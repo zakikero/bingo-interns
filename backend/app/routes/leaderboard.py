@@ -13,6 +13,16 @@ router = APIRouter()
 # ── Simple in-memory TTL cache for read-heavy endpoints ──
 _cache: dict[str, tuple[float, object]] = {}
 
+
+def invalidate_leaderboard_cache() -> None:
+    """Invalidate all cached leaderboard/stats results.
+
+    The leaderboard endpoints use an in-memory TTL cache for read-heavy traffic.
+    When submissions are created, we must invalidate this cache so callers can
+    see updated ranks immediately.
+    """
+    _cache.clear()
+
 def _get_cached(key: str, ttl: float):
     """Return cached value if still valid, else None."""
     entry = _cache.get(key)
