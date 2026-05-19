@@ -337,7 +337,7 @@ input:focus {
 
 .board-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   grid-template-rows: repeat(5, 1fr);
   gap: 0;
   border: 1px solid var(--border);
@@ -348,11 +348,12 @@ input:focus {
 
 .board-cell {
   position: relative;
-  min-height: 96px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   border: 1px solid var(--border);
   border-radius: 0;
   background: #ffffff;
-  padding: 12px;
+  padding: clamp(6px, 1.4vw, 12px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -395,7 +396,7 @@ input:focus {
 
 .cell-hover-overlay span {
   color: #fff;
-  font-size: 14px;
+  font-size: clamp(11px, 2.4vw, 14px);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -403,7 +404,7 @@ input:focus {
 
 
 .task-title {
-  font-size: 14px;
+  font-size: clamp(10px, 2.6vw, 14px);
   line-height: 1.25;
   margin: 0;
   font-weight: 700;
@@ -418,10 +419,6 @@ input:focus {
 @media (max-width: 900px) {
   .board-card {
     width: min(100%, 680px);
-  }
-
-  .board-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 
   .progress-pill {
@@ -442,10 +439,6 @@ input:focus {
   .board-header {
     flex-direction: column;
     gap: 8px;
-  }
-
-  .board-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 
   .progress-pill {
