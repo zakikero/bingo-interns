@@ -32,7 +32,9 @@ export default function Leaderboard() {
           <p className="eyebrow">GLOW BINGO</p>
           <h2>Leaderboard</h2>
         </div>
-        {!loading && <div className="progress-pill">{totalInterns} interns</div>}
+        {!loading && (
+          <div className="progress-pill">{totalInterns} participants</div>
+        )}
       </div>
 
       {loading ? (
