@@ -14,6 +14,7 @@ export default function SignupPage() {
       <p className="intro-text">
         Create your account to start tracking activities and complete your Fika
         Bingo board. May the odds be ever in your favor.
+
       </p>
       <SignupForm />
     </div>

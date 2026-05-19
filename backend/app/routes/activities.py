@@ -6,6 +6,7 @@ from app.models.activity import (
 )
 from app.models.user import Profile
 from app.db.connection import get_session
+from app.routes.leaderboard import invalidate_leaderboard_cache
 import uuid as uuid_pkg
 from typing import List, Optional
 from pydantic import BaseModel
@@ -111,6 +112,10 @@ def create_submission(submission_data: SubmissionCreate, session: Session = Depe
     session.add(new_submission)
     session.commit()
     session.refresh(new_submission)
+
+    # The leaderboard endpoints are read-cached (TTL). Invalidate on write so
+    # clients see updated ranks immediately after completing an activity.
+    invalidate_leaderboard_cache()
     return new_submission
 
 

@@ -71,15 +71,42 @@ _default_origins = [
     "https://bingointerns.onrender.com",
 ]
 _cors_origins_env = os.getenv("CORS_ORIGINS", "")
+
+def _parse_bool(value: str, default: bool) -> bool:
+    if value is None:
+        return default
+    v = value.strip().lower()
+    if v in {"1", "true", "yes", "y", "on"}:
+        return True
+    if v in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
+
+
+def _normalize_origin(origin: str) -> str:
+    # Keep scheme+host(+port). Remove trailing slash for consistency.
+    return origin.strip().rstrip("/")
+
+
 cors_origins = (
-    [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
+    [_normalize_origin(o) for o in _cors_origins_env.split(",") if o.strip()]
     if _cors_origins_env
     else _default_origins
 )
+
+cors_allow_credentials = _parse_bool(
+    os.getenv("CORS_ALLOW_CREDENTIALS", "true"),
+    default=True,
+)
+
+# Wildcard + credentials is not allowed by browsers.
+if "*" in cors_origins:
+    cors_origins = ["*"]
+    cors_allow_credentials = False
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=True,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

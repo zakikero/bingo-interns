@@ -2,12 +2,7 @@
 
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import {
-  useSubmitActivity,
-  useUserSubmissions,
-  useAuth,
-  useUserBoard,
-} from "@/lib/hooks";
+import { useSubmitActivity, useUserSubmissions, useAuth, useUserBoard } from "@/lib/hooks";
 import BingoCell from "./BingoCell";
 import ActivityModal from "./ActivityModal";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -16,9 +11,7 @@ import type { Activity } from "@/types";
 export default function BingoBoard() {
   const { user } = useAuth();
   const { submit, loading: submitting } = useSubmitActivity();
-  const { submissions, refetch: refetchSubmissions } = useUserSubmissions(
-    user?.id ?? null,
-  );
+  const { submissions, refetch: refetchSubmissions } = useUserSubmissions(user?.id ?? null);
   const {
     activities: boardActivities,
     loading: boardLoading,
@@ -27,9 +20,7 @@ export default function BingoBoard() {
   } = useUserBoard(user?.id ?? null);
 
   const [error, setError] = useState<string | null>(null);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
-    null,
-  );
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   // Optimistic set – instantly mark cells green before server round-trip confirms
   const [optimisticIds, setOptimisticIds] = useState<Set<string>>(new Set());
 
@@ -69,11 +60,9 @@ export default function BingoBoard() {
 
     const lines: number[][] = [];
     // 5 rows
-    for (let r = 0; r < 5; r++)
-      lines.push([0, 1, 2, 3, 4].map((c) => r * 5 + c));
+    for (let r = 0; r < 5; r++) lines.push([0, 1, 2, 3, 4].map((c) => r * 5 + c));
     // 5 columns
-    for (let c = 0; c < 5; c++)
-      lines.push([0, 1, 2, 3, 4].map((r) => r * 5 + c));
+    for (let c = 0; c < 5; c++) lines.push([0, 1, 2, 3, 4].map((r) => r * 5 + c));
     // 2 diagonals
     lines.push([0, 6, 12, 18, 24]);
     lines.push([4, 8, 12, 16, 20]);
@@ -94,8 +83,7 @@ export default function BingoBoard() {
 
       try {
         if (image) {
-          const { uploadSubmissionImage } =
-            await import("@/lib/api/submissions");
+          const { uploadSubmissionImage } = await import("@/lib/api/submissions");
           await uploadSubmissionImage(user.id, activityId, image);
         }
 
@@ -134,13 +122,8 @@ export default function BingoBoard() {
         !bingoDismissed &&
         createPortal(
           <div className="bingo-banner">
-            <span>
-              🎉 Congratulations! Send a message to Liza to receive your prize!
-            </span>
-            <button
-              className="bingo-banner-close"
-              onClick={() => setBingoDismissed(true)}
-            >
+            <span>🎉 Congratulations! Send a message to Melissa to receive your prize!</span>
+            <button className="bingo-banner-close" onClick={() => setBingoDismissed(true)}>
               ×
             </button>
           </div>,
@@ -150,16 +133,10 @@ export default function BingoBoard() {
       {/* Header */}
       <div className="board-header">
         <div>
-          <p className="eyebrow">GLOW BINGO</p>
-          <h2>
-            {user?.username
-              ? `${user.username}'s Activity Board`
-              : "My Activity Board"}
-          </h2>
+          <p className="eyebrow">FIKA BINGO</p>
+          <h2>{user?.username ? `${user.username}'s Activity Board` : "My Activity Board"}</h2>
         </div>
-        <div className="progress-pill progress-pill-compact">
-          {completedCount}/25 complete
-        </div>
+        <div className="progress-pill progress-pill-compact">{completedCount}/25 complete</div>
       </div>
 
       {/* Grid */}
@@ -183,11 +160,7 @@ export default function BingoBoard() {
 
       {/* Activity detail modal */}
       {selectedActivity && (
-        <ActivityModal
-          activity={selectedActivity}
-          onSubmit={handleSubmit}
-          onClose={() => setSelectedActivity(null)}
-        />
+        <ActivityModal activity={selectedActivity} onSubmit={handleSubmit} onClose={() => setSelectedActivity(null)} />
       )}
     </section>
   );

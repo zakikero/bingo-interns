@@ -1,13 +1,44 @@
 :root {
-  --bg-left: #f8ebe4;
-  --bg-right: #e6f6ea;
+  /* Ericsson-inspired palette */
+  --brand-midnight-blue: #002561;
+  /* Assumption: “Classic Logo Blue / Process Blue / Digital Blue” */
+  --brand-logo-blue: #00a9e0;
+
+  --brand-red: #c8102e;
+  --brand-yellow: #ffb81c;
+  --brand-green: #00a651;
+  --brand-purple: #6f2c91;
+
+  --accent-rgb: 0, 169, 224;
+  --danger-rgb: 200, 16, 46;
+  --purple-rgb: 111, 44, 145;
+  --green-rgb: 0, 166, 81;
+  --yellow-rgb: 255, 184, 28;
+
+  --bg-left: #eaf1ff;
+  --bg-mid: #f3f7ff;
+  --bg-right: #e6faff;
   --card: #ffffff;
-  --ink: #4e4545;
-  --muted: #8f8080;
-  --border: #e6dcd9;
-  --accent: #f7a983;
-  --accent-strong: #f29b73;
-  --pill: #fbf2ea;
+  --ink: #0b1b3a;
+  --muted: #4b5b7a;
+  --border: #d6dfef;
+
+  --accent: var(--brand-logo-blue);
+  --accent-strong: var(--brand-midnight-blue);
+  --accent-border: #b7def0;
+
+  --pill: #eef4ff;
+
+  --danger: var(--brand-red);
+  --danger-bg: #fde8ec;
+  --danger-border: #f7b8c4;
+
+  --success: var(--brand-green);
+  --success-bg: #e9f7ef;
+  --success-border: #bfe8d0;
+
+  --blob-1: #d7f0fa;
+  --blob-2: #e4e0ff;
   --shadow: 0 8px 20px rgba(46, 40, 40, 0.06);
   --glass: rgba(255, 255, 255, 0.7);
   --cell-shadow: 0 6px 18px rgba(46, 40, 40, 0.06);
@@ -27,7 +58,7 @@ body {
 
 body {
   min-height: 100vh;
-  background: linear-gradient(90deg, var(--bg-left) 0%, #f9f3ec 48%, var(--bg-right) 100%);
+  background: linear-gradient(90deg, var(--bg-left) 0%, var(--bg-mid) 48%, var(--bg-right) 100%);
 }
 
 .app-shell {
@@ -49,7 +80,7 @@ body {
 .blob-top-left {
   width: 125px;
   height: 125px;
-  background: #f6cdb3;
+  background: var(--blob-1);
   left: -26px;
   top: 38px;
 }
@@ -57,7 +88,7 @@ body {
 .blob-bottom-right {
   width: 138px;
   height: 138px;
-  background: #bde4d3;
+  background: var(--blob-2);
   right: -28px;
   bottom: -20px;
 }
@@ -79,8 +110,8 @@ body {
 
 .eyebrow {
   margin: 0;
-  color: #d78d8f;
-  font-size: 11px;
+  color: var(--brand-red);
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -98,7 +129,7 @@ body {
   text-align: center;
   font-size: 13px;
   line-height: 1.45;
-  color: #807474;
+  color: var(--muted);
 }
 
 .login-form {
@@ -111,9 +142,9 @@ body {
 }
 
 .form-error {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 13px;
@@ -128,13 +159,13 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  background: #dc2626;
+  background: var(--danger);
   color: #fff;
   padding: 12px 20px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 8px 24px rgba(var(--danger-rgb), 0.28);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -176,7 +207,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  background: linear-gradient(135deg, #a855f7, #6366f1);
+  background: linear-gradient(135deg, var(--brand-purple), var(--accent));
   color: #fff;
   padding: 20px 28px;
   border-radius: 14px;
@@ -186,7 +217,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 10px 32px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 10px 32px rgba(var(--purple-rgb), 0.35);
   animation: bingo-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   max-width: min(92vw, 560px);
 }
@@ -231,22 +262,22 @@ label {
 
 input {
   width: 100%;
-  border: 1px solid #e7dfdb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 16px;
   outline: none;
   color: var(--ink);
-  background: #fff;
+  background: var(--card);
 }
 
 input::placeholder {
-  color: #baa7a7;
+  color: var(--muted);
 }
 
 input:focus {
-  border-color: #e4b29d;
-  box-shadow: 0 0 0 3px rgba(247, 169, 131, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
 }
 
 .btn {
@@ -269,7 +300,7 @@ input:focus {
   background: linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 8px 20px rgba(242, 155, 115, 0.12);
+  box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.18);
 }
 
 .btn-secondary {
@@ -295,9 +326,9 @@ input:focus {
 }
 
 .form-success {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 13px;
@@ -310,6 +341,13 @@ input:focus {
   padding: 18px 18px 18px;
 }
 
+/* Main bingo board: slightly smaller than other cards (~50px) */
+.board-card-main {
+  max-width: 670px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .board-header {
   display: flex;
   justify-content: space-between;
@@ -319,19 +357,19 @@ input:focus {
 
 .board-header h2 {
   margin: 2px 0 0;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 500;
-  color: #6c6464;
+  color: var(--muted);
 }
 
 .progress-pill {
-  border: 1px solid #ebd6ca;
+  border: 1px solid var(--border);
   background: var(--pill);
   border-radius: 999px;
   padding: 8px 14px;
   font-size: 28px;
   font-weight: 600;
-  color: #a5826f;
+  color: var(--accent-strong);
   white-space: nowrap;
 }
 
@@ -373,7 +411,7 @@ input:focus {
 }
 
 .board-cell.completed {
-  background: #d4edda;
+  background: var(--success-bg);
   border-color: var(--border);
 }
 
@@ -421,6 +459,10 @@ input:focus {
     width: min(100%, 680px);
   }
 
+  .board-card-main {
+    max-width: 630px;
+  }
+
   .progress-pill {
     font-size: 22px;
   }
@@ -443,6 +485,14 @@ input:focus {
 
   .progress-pill {
     font-size: 20px;
+  }
+
+  .board-header h2 {
+    font-size: 24px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
   }
 }
 
@@ -488,7 +538,7 @@ input:focus {
 
 .main-signout-btn {
   min-width: 140px;
-  box-shadow: 0 10px 24px rgba(242, 155, 115, 0.2);
+  box-shadow: 0 10px 24px rgba(var(--accent-rgb), 0.22);
 }
 
 .main-signout-btn:hover {
@@ -595,8 +645,8 @@ input:focus {
 }
 
 .podium-1 {
-  background: linear-gradient(160deg, #fff8f1, #fff3e8);
-  border-color: #f1b391;
+  background: linear-gradient(160deg, rgba(var(--yellow-rgb), 0.16), rgba(255, 255, 255, 0.7));
+  border-color: rgba(var(--yellow-rgb), 0.45);
 }
 
 .podium-medal {
@@ -648,8 +698,8 @@ input:focus {
 }
 
 .lb-row.is-me {
-  background: linear-gradient(90deg, rgba(247, 169, 131, 0.08), rgba(242, 155, 115, 0.06));
-  border-color: #f1c4ab;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), rgba(var(--accent-rgb), 0.06));
+  border-color: var(--accent-border);
 }
 
 .lb-row.lb-row-top .lb-rank {
@@ -665,15 +715,15 @@ input:focus {
 }
 
 .rank-gold {
-  color: #d4a017;
+  color: var(--brand-yellow);
 }
 
 .rank-silver {
-  color: #8a8a8a;
+  color: var(--muted);
 }
 
 .rank-bronze {
-  color: #a0601a;
+  color: var(--brand-purple);
 }
 
 .lb-identity {
@@ -721,7 +771,7 @@ input:focus {
 .lb-bar-track {
   width: 100%;
   height: 6px;
-  background: #f0e8e4;
+  background: var(--pill);
   border-radius: 999px;
   overflow: hidden;
 }
