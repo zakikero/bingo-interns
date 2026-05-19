@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main-simplified
+      - main
 
 jobs:
   build-and-push:
