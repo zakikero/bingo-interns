@@ -4,8 +4,8 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 
 export const metadata = {
-  title: "Internship Bingo",
-  description: "Intelcom Internship Bingo",
+  title: "Fika Bingo",
+  description: "Fika Bingo Event",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
