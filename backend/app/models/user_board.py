@@ -11,7 +11,6 @@ class UserBoardActivity(SQLModel, table=True):
     __tablename__ = "user_board_activities"
     __table_args__ = (
         UniqueConstraint("user_id", "position", name="uq_user_board_position"),
-        UniqueConstraint("user_id", "activity_id", name="uq_user_board_activity"),
     )
 
     id: uuid_pkg.UUID = Field(default_factory=uuid_pkg.uuid4, primary_key=True)

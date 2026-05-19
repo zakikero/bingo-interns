@@ -10,6 +10,7 @@ import base64
 import hashlib
 import hmac
 import secrets
+import random
 
 router = APIRouter()
 
@@ -221,6 +222,63 @@ def get_user_board(user_id: uuid_pkg.UUID, session: Session = Depends(get_sessio
                 )
             )
         session.commit()
+    else:
+        joined = session.exec(
+            select(UserBoardActivity, Activity)
+            .join(Activity, UserBoardActivity.activity_id == Activity.id, isouter=True)
+            .where(UserBoardActivity.user_id == user_id)
+            .order_by(UserBoardActivity.position)
+        ).all()
+
+        rows_by_position: dict[int, UserBoardActivity] = {}
+        used_activity_ids: set[uuid_pkg.UUID] = set()
+        missing_positions: set[int] = set()
+
+        for row, activity in joined:
+            rows_by_position[row.position] = row
+            if activity is None:
+                missing_positions.add(row.position)
+            else:
+                used_activity_ids.add(activity.id)
+
+        for position in range(25):
+            if position not in rows_by_position:
+                missing_positions.add(position)
+
+        if missing_positions:
+            all_activities = session.exec(select(Activity)).all()
+            if not all_activities:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No activities available to rebuild the board",
+                )
+
+            unique_candidates = [
+                activity for activity in all_activities
+                if activity.id not in used_activity_ids
+            ]
+            random.shuffle(unique_candidates)
+
+            for position in sorted(missing_positions):
+                if unique_candidates:
+                    replacement = unique_candidates.pop(0)
+                else:
+                    replacement = random.choice(all_activities)
+
+                existing_row = rows_by_position.get(position)
+                if existing_row:
+                    existing_row.activity_id = replacement.id
+                else:
+                    session.add(
+                        UserBoardActivity(
+                            user_id=user_id,
+                            activity_id=replacement.id,
+                            position=position,
+                        )
+                    )
+                used_activity_ids.add(replacement.id)
+
+            session.commit()
 
     statement = (
         select(Activity)

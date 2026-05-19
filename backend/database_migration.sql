@@ -30,9 +30,12 @@ CREATE TABLE IF NOT EXISTS user_board_activities (
     user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
     position INTEGER NOT NULL CHECK (position >= 0 AND position < 25),
-    UNIQUE(user_id, position),
-    UNIQUE(user_id, activity_id)
+    UNIQUE(user_id, position)
 );
+
+-- Allow duplicate activities on a user's board (fallback when unique activities are exhausted)
+ALTER TABLE user_board_activities
+    DROP CONSTRAINT IF EXISTS uq_user_board_activity;
 
 CREATE INDEX IF NOT EXISTS idx_user_board_activities_user ON user_board_activities(user_id);
 
