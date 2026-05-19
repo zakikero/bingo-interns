@@ -10,13 +10,18 @@ interface ActivityModalProps {
   onClose: () => void;
 }
 
-export default function ActivityModal({ activity, onSubmit, onClose }: ActivityModalProps) {
+export default function ActivityModal({
+  activity,
+  onSubmit,
+  onClose,
+}: ActivityModalProps) {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isImageRequired = activity.isImageRequired;
 
   // Revoke the previous object URL to prevent memory leaks
   const pickFile = useCallback((file: File | null) => {
@@ -63,6 +68,10 @@ export default function ActivityModal({ activity, onSubmit, onClose }: ActivityM
     e.preventDefault();
 
     setError(null);
+    if (isImageRequired && !image) {
+      setError("Please upload an image to complete this activity.");
+      return;
+    }
     setLoading(true);
     try {
       await onSubmit(activity.id, image);
@@ -79,7 +88,11 @@ export default function ActivityModal({ activity, onSubmit, onClose }: ActivityM
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{activity.title}</h2>
-          <button className="modal-close-btn" onClick={onClose} aria-label="Close">
+          <button
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
@@ -90,10 +103,10 @@ export default function ActivityModal({ activity, onSubmit, onClose }: ActivityM
           {error && <p className="form-error">{error}</p>}
 
           {/* Image upload */}
-          {activity.isImageRequired && (
+          {isImageRequired && (
             <div className="modal-field">
               <label htmlFor="activity-image">
-                Upload image <span className="modal-required">*optional</span>
+                Upload image <span className="modal-required">*required</span>
               </label>
               <div
                 className={`modal-file-zone${dragging ? " drag-over" : ""}`}
@@ -104,7 +117,11 @@ export default function ActivityModal({ activity, onSubmit, onClose }: ActivityM
               >
                 {preview ? (
                   <div className="modal-preview-wrapper">
-                    <img src={preview} alt="Preview" className="modal-preview-img" />
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="modal-preview-img"
+                    />
                     <button
                       type="button"
                       className="modal-preview-remove"
@@ -128,13 +145,18 @@ export default function ActivityModal({ activity, onSubmit, onClose }: ActivityM
                 id="activity-image"
                 type="file"
                 accept="image/*"
+                required={isImageRequired}
                 onChange={handleImageChange}
                 style={{ display: "none" }}
               />
             </div>
           )}
 
-          <button className="btn btn-primary modal-submit-btn" type="submit" disabled={loading}>
+          <button
+            className="btn btn-primary modal-submit-btn"
+            type="submit"
+            disabled={loading || (isImageRequired && !image)}
+          >
             {loading ? "Submitting…" : "Complete Activity"}
           </button>
         </form>
