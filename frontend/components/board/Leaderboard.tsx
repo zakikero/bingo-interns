@@ -33,7 +33,9 @@ export default function Leaderboard() {
           <h2>Leaderboard</h2>
         </div>
         {!loading && (
-          <div className="progress-pill">{totalInterns} participants</div>
+          <div className="progress-pill progress-pill-compact">
+            {totalInterns} participants
+          </div>
         )}
       </div>
 
