@@ -447,8 +447,12 @@ input:focus {
   margin: 0;
   font-weight: 700;
   color: var(--ink);
-  text-align: left;
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
