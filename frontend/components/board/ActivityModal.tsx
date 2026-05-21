@@ -117,7 +117,11 @@ export default function ActivityModal({
         <p className="modal-description">{activity.description}</p>
 
         <form onSubmit={handleSubmit}>
-          {error && <p className="form-error">{error}</p>}
+          {error && (
+            <p className="form-error" aria-live="polite">
+              {error}
+            </p>
+          )}
 
           {/* Image upload */}
           <div className="modal-field">
@@ -166,7 +170,6 @@ export default function ActivityModal({
               id="activity-image"
               type="file"
               accept="image/*"
-              required={isImageRequired}
               onChange={handleImageChange}
               style={{ display: "none" }}
             />
@@ -195,11 +198,7 @@ export default function ActivityModal({
           <button
             className="btn btn-primary modal-submit-btn"
             type="submit"
-            disabled={
-              loading ||
-              (isImageRequired && !image) ||
-              (isTextRequired && textResponse.trim().length === 0)
-            }
+            disabled={loading}
           >
             {loading ? "Submitting…" : "Complete Activity"}
           </button>
