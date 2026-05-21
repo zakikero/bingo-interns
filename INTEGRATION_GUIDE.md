@@ -164,7 +164,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 # Ou pour Supabase:
 # DATABASE_URL=postgresql://(username):(password)@(host)/(database)
 
-# Optionnel: origines CORS separées par des virgules
+# Optionnel: origines CORS séparées par des virgules
 CORS_ORIGINS=http://localhost:3000,https://your-domain.com
 ```
 
