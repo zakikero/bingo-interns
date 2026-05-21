@@ -37,11 +37,16 @@ export async function uploadSubmissionImage(
 export async function submitActivity(
   userId: string,
   activityId: string,
+  textResponse: string | null = null,
 ): Promise<Submission> {
   const response = await fetch(`${API_BASE_URL}/api/submissions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userId, activity_id: activityId }),
+    body: JSON.stringify({
+      user_id: userId,
+      activity_id: activityId,
+      textResponse,
+    }),
   });
 
   if (!response.ok) {

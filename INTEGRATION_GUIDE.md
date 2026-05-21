@@ -163,6 +163,9 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 DATABASE_URL=postgresql://user:password@localhost/bingo_db
 # Ou pour Supabase:
 # DATABASE_URL=postgresql://(username):(password)@(host)/(database)
+
+# Optionnel: origines CORS separées par des virgules
+CORS_ORIGINS=http://localhost:3000,https://your-domain.com
 ```
 
 ## Dépannage

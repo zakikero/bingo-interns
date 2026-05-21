@@ -70,7 +70,7 @@ _default_origins = [
     "http://127.0.0.1:3000", "http://127.0.0.1:3001",
     "https://bingointerns.onrender.com",
 ]
-_cors_origins_env = os.getenv("CORS_ORIGINS", "")
+_cors_origins_env = os.getenv("CORS_ORIGINS") or os.getenv("CORS_ORGINS", "")
 
 def _parse_bool(value: str, default: bool) -> bool:
     if value is None:
@@ -88,11 +88,11 @@ def _normalize_origin(origin: str) -> str:
     return origin.strip().rstrip("/")
 
 
-cors_origins = (
-    [_normalize_origin(o) for o in _cors_origins_env.split(",") if o.strip()]
-    if _cors_origins_env
-    else _default_origins
-)
+_env_origins = [_normalize_origin(o) for o in _cors_origins_env.split(",") if o.strip()]
+if _env_origins:
+    cors_origins = list(dict.fromkeys(_default_origins + _env_origins))
+else:
+    cors_origins = _default_origins
 
 cors_allow_credentials = _parse_bool(
     os.getenv("CORS_ALLOW_CREDENTIALS", "true"),

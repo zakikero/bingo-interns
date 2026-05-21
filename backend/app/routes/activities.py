@@ -13,6 +13,8 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+MAX_TEXT_LENGTH = 150
+
 
 # Additional request models
 class ActivityUpdate(BaseModel):
@@ -107,8 +109,28 @@ def create_submission(submission_data: SubmissionCreate, session: Session = Depe
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="User already submitted for this activity"
         )
+
+    text_response = submission_data.textResponse
+    if text_response is not None:
+        text_response = text_response.strip()
+        if not text_response:
+            text_response = None
+
+    if activity.isTextRequired and not text_response:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Text response is required for this activity"
+        )
+
+    if text_response and len(text_response) > MAX_TEXT_LENGTH:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Text response must be {MAX_TEXT_LENGTH} characters or fewer"
+        )
     
-    new_submission = Submission(**submission_data.model_dump())
+    submission_payload = submission_data.model_dump()
+    submission_payload["textResponse"] = text_response
+    new_submission = Submission(**submission_payload)
     session.add(new_submission)
     session.commit()
     session.refresh(new_submission)

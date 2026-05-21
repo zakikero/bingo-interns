@@ -936,6 +936,13 @@ input:focus {
   margin-left: 4px;
 }
 
+.modal-optional {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
 .modal-file-zone {
   border: 2px dashed var(--border);
   border-radius: 12px;
@@ -992,6 +999,37 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.modal-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--card);
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-textarea::placeholder {
+  color: var(--muted);
+}
+
+.modal-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+}
+
+.modal-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
 }
 
 .modal-submit-btn {

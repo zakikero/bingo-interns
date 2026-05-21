@@ -163,6 +163,9 @@ curl http://localhost:8000/api/users/{user_id}/board
 
 ```
 DATABASE_URL=postgresql://user:password@localhost/bingo_db
+
+# Optional: comma-separated list of allowed CORS origins
+CORS_ORIGINS=http://localhost:3000,https://your-domain.com
 ```
 
 ### Frontend (`.env.local`)
