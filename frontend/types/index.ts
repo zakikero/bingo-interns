@@ -15,11 +15,13 @@ export interface Activity {
   title: string;
   description: string;
   isImageRequired: boolean;
+  isTextRequired: boolean;
 }
 
 export interface Submission {
   id?: string;
   user_id: string;
   activity_id: string;
+  textResponse?: string | null;
   created_at?: string;
 }

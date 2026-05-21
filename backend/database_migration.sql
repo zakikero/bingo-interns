@@ -40,7 +40,6 @@ ALTER TABLE user_board_activities
 CREATE INDEX IF NOT EXISTS idx_user_board_activities_user ON user_board_activities(user_id);
 
 -- Performance indexes for activities table
-CREATE INDEX IF NOT EXISTS idx_activities_index ON activities(index) WHERE index IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);
 -- Single-column index on activity_id for submission lookups by activity
 CREATE INDEX IF NOT EXISTS idx_submissions_activity_id ON submissions(activity_id);
@@ -62,4 +61,8 @@ ALTER TABLE submissions ALTER COLUMN image_url DROP NOT NULL;
 
 -- Drop image_url column (no longer used)
 ALTER TABLE submissions DROP COLUMN IF EXISTS image_url;
+
+-- Add text response support
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS "isTextRequired" BOOLEAN DEFAULT FALSE;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS "textResponse" TEXT;
 
