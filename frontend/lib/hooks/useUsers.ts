@@ -26,7 +26,9 @@ export function useUsers(): UseUsersResult {
         if (!cancelled) setUsers(data);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to fetch users");
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch users",
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);

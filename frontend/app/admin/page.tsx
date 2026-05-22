@@ -18,14 +18,13 @@ function toDate(value: string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [hasAccess, setHasAccess] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(
-    null,
-  );
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<
+    string | null
+  >(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -76,7 +75,11 @@ export default function AdminPage() {
   }, [submissions, activitiesById, searchTerm]);
 
   const selectedSubmission = useMemo(() => {
-    return filteredSubmissions.find((submission) => submission.id === selectedSubmissionId) ?? null;
+    return (
+      filteredSubmissions.find(
+        (submission) => submission.id === selectedSubmissionId,
+      ) ?? null
+    );
   }, [filteredSubmissions, selectedSubmissionId]);
 
   const selectedUser = useMemo(() => {
@@ -198,13 +201,20 @@ export default function AdminPage() {
                   : "Unknown date";
 
                 return (
-                  <li key={submission.id ?? `${submission.user_id}-${submission.activity_id}`}>
+                  <li
+                    key={
+                      submission.id ??
+                      `${submission.user_id}-${submission.activity_id}`
+                    }
+                  >
                     <button
                       type="button"
                       className={`admin-list-item${
                         submission.id === selectedSubmissionId ? " active" : ""
                       }`}
-                      onClick={() => setSelectedSubmissionId(submission.id ?? null)}
+                      onClick={() =>
+                        setSelectedSubmissionId(submission.id ?? null)
+                      }
                     >
                       <span className="admin-list-title">
                         {activity?.title ?? "Unknown activity"}
@@ -224,17 +234,24 @@ export default function AdminPage() {
             <p className="admin-empty">Select a user to see details.</p>
           )}
           {selectedUser && !selectedSubmission && (
-            <p className="admin-empty">Select an activity to see its submission.</p>
+            <p className="admin-empty">
+              Select an activity to see its submission.
+            </p>
           )}
           {selectedSubmission && (
             <div className="admin-detail">
               <div>
-                <h3>{activitiesById[selectedSubmission.activity_id]?.title ?? "Activity"}</h3>
+                <h3>
+                  {activitiesById[selectedSubmission.activity_id]?.title ??
+                    "Activity"}
+                </h3>
                 <p className="admin-detail-meta">
                   User: {selectedUser?.username}
                 </p>
                 <p className="admin-detail-meta">
-                  Submitted: {toDate(selectedSubmission.created_at)?.toLocaleString() ?? "Unknown"}
+                  Submitted:{" "}
+                  {toDate(selectedSubmission.created_at)?.toLocaleString() ??
+                    "Unknown"}
                 </p>
               </div>
               <div className="admin-detail-block">
