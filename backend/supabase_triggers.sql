@@ -58,15 +58,12 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW
-    EXECUTE FUNCTION public.handle_new_user();
+-- Supabase auth trigger removed: user creation is handled by the app
 
 -- ============================================
 -- 6. CREATE INDEXES FOR PERFORMANCE
 -- ============================================
-CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles(email);
+CREATE INDEX IF NOT EXISTS idx_profiles_username ON public.profiles(username);
 
 -- ============================================
 -- 7. GRANT PERMISSIONS

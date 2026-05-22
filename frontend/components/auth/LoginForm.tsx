@@ -7,27 +7,16 @@ import PasswordInput from "@/components/ui/PasswordInput";
 
 export default function LoginForm() {
   const router = useRouter();
-  const { login, resetPassword, loading, error, successMessage } = useAuth();
+  const { login, loading, error } = useAuth();
 
-  const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(username, password);
       router.push("/board");
-    } catch {
-      // error is already captured in the hook
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!email) {
-      return;
-    }
-    try {
-      await resetPassword(email);
     } catch {
       // error is already captured in the hook
     }
@@ -36,17 +25,15 @@ export default function LoginForm() {
   return (
     <form className="login-form" onSubmit={handleSubmit}>
       {error && <p className="form-error">{error}</p>}
-      {successMessage && <p className="form-success">{successMessage}</p>}
-
-      <label htmlFor="login-email">Email</label>
+      <label htmlFor="login-username">Username</label>
       <input
-        id="login-email"
-        type="email"
-        placeholder="you@example.com"
-        autoComplete="email"
+        id="login-username"
+        type="text"
+        placeholder="your-username"
+        autoComplete="username"
         required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
 
       <label htmlFor="login-password">Password</label>
@@ -60,15 +47,6 @@ export default function LoginForm() {
 
       <button className="btn btn-primary" type="submit" disabled={loading}>
         {loading ? "Signing in…" : "Sign in"}
-      </button>
-
-      <button
-        className="btn btn-link"
-        type="button"
-        disabled={loading}
-        onClick={handleResetPassword}
-      >
-        Forgot password?
       </button>
 
       <button

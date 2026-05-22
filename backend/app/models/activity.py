@@ -16,11 +16,12 @@ class Activity(SQLModel, table=True):
     title: str
     description: str
     isImageRequired: bool = False
-    index: Optional[int] = Field(default=None, index=True)
+    isTextRequired: bool = False
 
 class ActivityCreate(SQLModel):
     title: str
     description: str
+    isTextRequired: bool = False
 
 
 class ActivityResponse(SQLModel):
@@ -29,7 +30,7 @@ class ActivityResponse(SQLModel):
     title: str
     description: str
     isImageRequired: bool
-    index: Optional[int] = None
+    isTextRequired: bool
 
 
 class Submission(SQLModel, table=True):
@@ -42,11 +43,15 @@ class Submission(SQLModel, table=True):
     created_at: Optional[datetime] = Field(default_factory=_utcnow)
     user_id: uuid_pkg.UUID = Field(foreign_key="profiles.id")
     activity_id: uuid_pkg.UUID = Field(foreign_key="activities.id", index=True)
+    textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None
 
 
 class SubmissionCreate(SQLModel):
     user_id: uuid_pkg.UUID
     activity_id: uuid_pkg.UUID
+    textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None
 
 
 class SubmissionResponse(SQLModel):
@@ -54,3 +59,5 @@ class SubmissionResponse(SQLModel):
     created_at: datetime
     user_id: uuid_pkg.UUID
     activity_id: uuid_pkg.UUID
+    textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Complete REST API for a Bingo challenge application with image submissions, 25-box boards, and leaderboards.
+Complete REST API for a Bingo challenge application with submissions, 25-box boards, and leaderboards.
 
 **Base URL**: `http://localhost:8000`  
 **API Docs**: `http://localhost:8000/docs`
@@ -11,18 +11,33 @@ Complete REST API for a Bingo challenge application with image submissions, 25-b
 
 ## 🔐 User Management
 
-### Sync Supabase User Profile
+### Register
 
 ```http
-POST /api/users/sync
+POST /api/auth/register
 ```
 
 **Request Body:**
 
 ```json
 {
-  "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "email": "user@example.com"
+  "username": "user123",
+  "password": "password123"
+}
+```
+
+### Login
+
+```http
+POST /api/auth/login
+```
+
+**Request Body:**
+
+```json
+{
+  "username": "user123",
+  "password": "password123"
 }
 ```
 
@@ -85,7 +100,7 @@ DELETE /api/activities/{activity_id}
 
 ---
 
-## 📸 Submissions (Image Proof)
+## 📸 Submissions
 
 ### Submit Activity Completion
 
@@ -98,9 +113,7 @@ POST /api/submissions
 ```json
 {
   "user_id": "uuid-here",
-  "activity_id": "uuid-here",
-  "image_url": "https://storage.example.com/image.jpg",
-  "status": "pending"
+  "activity_id": "uuid-here"
 }
 ```
 
@@ -116,92 +129,17 @@ GET /api/submissions/user/{user_id}
 GET /api/submissions/activity/{activity_id}
 ```
 
-### Approve/Reject Submission
-
-```http
-PATCH /api/submissions/{submission_id}/status
-```
-
-**Request Body:**
-
-```json
-{
-  "status": "approved" // or "rejected" or "pending"
-}
-```
-
 ---
 
-## 🎲 Bingo Boards (25 Boxes)
+## 🎲 User Board (25 Boxes)
 
-### Create Bingo Board
-
-```http
-POST /api/boards
-```
-
-**Request Body:**
-
-```json
-{
-  "title": "Summer Challenge 2026",
-  "description": "Complete all 25 summer activities!",
-  "activity_ids": [
-    "uuid1", "uuid2", "uuid3", ..., "uuid25"
-  ]
-}
-```
-
-**Note:** Must provide exactly 25 activity IDs
-
-### Get All Boards
+### Get User Board
 
 ```http
-GET /api/boards?active_only=true
+GET /api/users/{user_id}/board
 ```
 
-### Get Board with Activities
-
-```http
-GET /api/boards/{board_id}
-```
-
-**Response includes activities in order (positions 0-24)**
-
-### Get User Progress on Board
-
-```http
-GET /api/boards/{board_id}/progress/{user_id}
-```
-
-**Response:**
-
-```json
-{
-  "board_id": "uuid",
-  "board_title": "Summer Challenge 2026",
-  "total_activities": 25,
-  "completed_activities": 8,
-  "completed_positions": [0, 3, 5, 7, 12, 15, 18, 22]
-}
-```
-
-### Mark Activity Complete on Board
-
-```http
-POST /api/boards/{board_id}/complete?user_id={user_id}&activity_id={activity_id}&submission_id={submission_id}
-```
-
-**Requirements:**
-
-- Submission must exist and be approved
-- Links user's approved submission to board progress
-
-### Activate/Deactivate Board
-
-```http
-PATCH /api/boards/{board_id}?is_active=false
-```
+**Response:** ordered list of 25 activities for the user. The first call generates the board.
 
 ---
 
@@ -219,18 +157,12 @@ GET /api/leaderboard/top?limit=5
 [
   {
     "user_id": "uuid",
-    "email": "user@example.com",
+    "username": "user123",
     "completed_activities": 32,
     "rank": 1
   },
   ...
 ]
-```
-
-### Get Board-Specific Leaderboard
-
-```http
-GET /api/leaderboard/board/{board_id}?limit=5
 ```
 
 ### Get User Statistics
@@ -244,11 +176,8 @@ GET /api/stats/user/{user_id}
 ```json
 {
   "user_id": "uuid",
-  "email": "user@example.com",
-  "completed_activities": 18,
-  "approved_submissions": 18,
-  "pending_submissions": 3,
-  "rejected_submissions": 2
+  "username": "user123",
+  "completed_activities": 18
 }
 ```
 
@@ -264,11 +193,7 @@ GET /api/stats/global
 {
   "total_users": 156,
   "total_activities": 50,
-  "total_boards": 3,
-  "active_boards": 2,
-  "total_submissions": 523,
-  "approved_submissions": 412,
-  "pending_submissions": 111
+  "total_submissions": 523
 }
 ```
 

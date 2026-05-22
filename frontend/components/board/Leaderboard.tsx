@@ -11,9 +11,13 @@ const RANK_CLASS: Record<number, string> = {
   3: "rank-bronze",
 };
 
-export default function Leaderboard() {
+interface LeaderboardProps {
+  autoRefreshMs?: number;
+}
+
+export default function Leaderboard({ autoRefreshMs }: LeaderboardProps) {
   const { user } = useAuth();
-  const { entries, loading, refetch } = useLeaderboard(5);
+  const { entries, totalInterns, loading, refetch } = useLeaderboard(10);
 
   // Auto-refresh when a submission is completed on the board
   useEffect(() => {
@@ -21,6 +25,12 @@ export default function Leaderboard() {
     window.addEventListener("submission-completed", handler);
     return () => window.removeEventListener("submission-completed", handler);
   }, [refetch]);
+
+  useEffect(() => {
+    if (!autoRefreshMs) return;
+    const id = window.setInterval(() => refetch(), autoRefreshMs);
+    return () => window.clearInterval(id);
+  }, [autoRefreshMs, refetch]);
 
   const TOTAL = 25;
 
@@ -33,7 +43,9 @@ export default function Leaderboard() {
           <h2>Leaderboard</h2>
         </div>
         {!loading && (
-          <div className="progress-pill">{entries.length} interns</div>
+          <div className="progress-pill progress-pill-compact">
+            {totalInterns} participants
+          </div>
         )}
       </div>
 

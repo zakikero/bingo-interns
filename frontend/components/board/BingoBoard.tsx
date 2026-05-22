@@ -6,9 +6,8 @@ import {
   useSubmitActivity,
   useUserSubmissions,
   useAuth,
-  useActivities,
+  useUserBoard,
 } from "@/lib/hooks";
-import { FALLBACK_TASKS } from "@/constants/tasks";
 import BingoCell from "./BingoCell";
 import ActivityModal from "./ActivityModal";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -21,11 +20,10 @@ export default function BingoBoard() {
     user?.id ?? null,
   );
   const {
-    activities,
-    loading: activitiesLoading,
-    error: activitiesError,
-    refetch: refetchActivities,
-  } = useActivities();
+    activities: boardActivities,
+    loading: boardLoading,
+    error: boardError,
+  } = useUserBoard(user?.id ?? null);
 
   const [error, setError] = useState<string | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
@@ -34,12 +32,12 @@ export default function BingoBoard() {
   // Optimistic set – instantly mark cells green before server round-trip confirms
   const [optimisticIds, setOptimisticIds] = useState<Set<string>>(new Set());
 
-  const displayActivities = activities.length > 0 ? activities : FALLBACK_TASKS;
+  const displayActivities = boardActivities;
 
   // Surface API errors as a toast
   useEffect(() => {
-    if (activitiesError) setError(activitiesError);
-  }, [activitiesError]);
+    if (boardError) setError(boardError);
+  }, [boardError]);
 
   // Auto-dismiss error toast after 4 s
   useEffect(() => {
@@ -88,21 +86,25 @@ export default function BingoBoard() {
   }, []);
 
   const handleSubmit = useCallback(
-    async (activityId: string, image: File | null): Promise<void> => {
+    async (
+      activityId: string,
+      image: File | null,
+      textResponse: string | null,
+    ): Promise<void> => {
       if (!user) return;
 
       setOptimisticIds((prev) => new Set(prev).add(activityId));
 
       try {
+        let imageUrl: string | null = null;
         if (image) {
           const { uploadSubmissionImage } =
             await import("@/lib/api/submissions");
-          await uploadSubmissionImage(user.id, activityId, image);
+          imageUrl = await uploadSubmissionImage(user.id, activityId, image);
         }
 
-        await submit(user.id, activityId);
+        await submit(user.id, activityId, textResponse, imageUrl);
         refetchSubmissions();
-        refetchActivities();
         window.dispatchEvent(new Event("submission-completed"));
       } catch (err) {
         setOptimisticIds((prev) => {
@@ -113,7 +115,7 @@ export default function BingoBoard() {
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     },
-    [user, submit, refetchSubmissions, refetchActivities],
+    [user, submit, refetchSubmissions],
   );
 
   return (
@@ -136,7 +138,8 @@ export default function BingoBoard() {
         createPortal(
           <div className="bingo-banner">
             <span>
-              🎉 Congratulations! Send a message to Liza to receive your prize!
+              🎉 Congratulations! Send a message to Melissa to receive your
+              prize!
             </span>
             <button
               className="bingo-banner-close"
@@ -151,9 +154,11 @@ export default function BingoBoard() {
       {/* Header */}
       <div className="board-header">
         <div>
-          <p className="eyebrow">GLOW BINGO</p>
+          <p className="eyebrow">FIKA BINGO</p>
           <h2>
-            {user?.name ? `${user.name}'s Activity Board` : "My Activity Board"}
+            {user?.username
+              ? `${user.username}'s Activity Board`
+              : "My Activity Board"}
           </h2>
         </div>
         <div className="progress-pill progress-pill-compact">
@@ -162,8 +167,10 @@ export default function BingoBoard() {
       </div>
 
       {/* Grid */}
-      {activitiesLoading ? (
+      {boardLoading ? (
         <LoadingSpinner message="Loading activities…" size="lg" />
+      ) : displayActivities.length === 0 ? (
+        <p className="leaderboard-empty">No activities available.</p>
       ) : (
         <div className="board-grid">
           {displayActivities.map((activity) => (

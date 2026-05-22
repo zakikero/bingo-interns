@@ -9,8 +9,7 @@ export default function SignupForm() {
   const router = useRouter();
   const { register, loading, error } = useAuth();
 
-  const [email, setEmail] = useState<string>("");
-  const [name, setName] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [matchError, setMatchError] = useState<string | null>(null);
@@ -23,7 +22,7 @@ export default function SignupForm() {
     }
     setMatchError(null);
     try {
-      await register(email, password, name || undefined);
+      await register(username, password);
       router.push("/board");
     } catch {
       // error is already captured in the hook
@@ -36,26 +35,15 @@ export default function SignupForm() {
         <p className="form-error">{matchError ?? error}</p>
       )}
 
-      <label htmlFor="signup-name">Name</label>
+      <label htmlFor="signup-username">Username</label>
       <input
-        id="signup-name"
+        id="signup-username"
         type="text"
-        placeholder="Your name"
-        autoComplete="name"
+        placeholder="your-username"
+        autoComplete="username"
         required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-
-      <label htmlFor="signup-email">Email</label>
-      <input
-        id="signup-email"
-        type="email"
-        placeholder="you@example.com"
-        autoComplete="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
 
       <label htmlFor="signup-password">Password</label>

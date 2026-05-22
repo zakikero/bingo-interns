@@ -1,61 +1,58 @@
 -- Bingo App Database Schema
 -- Run this SQL in your Supabase SQL Editor to create the new tables
 
--- ============================================
--- CREATE BINGO BOARDS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS bingo_boards (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    title TEXT NOT NULL,
-    description TEXT,
-    is_active BOOLEAN DEFAULT TRUE
-);
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ============================================
--- CREATE BINGO BOARD ACTIVITIES (Junction Table)
+-- UPDATE PROFILES TABLE FOR USERNAME AUTH
 -- ============================================
-CREATE TABLE IF NOT EXISTS bingo_board_activities (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    board_id UUID NOT NULL REFERENCES bingo_boards(id) ON DELETE CASCADE,
-    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
-    position INTEGER NOT NULL CHECK (position >= 0 AND position < 25),
-    UNIQUE(board_id, position),  -- Each position on a board must be unique
-    UNIQUE(board_id, activity_id)  -- Each activity can only appear once per board
-);
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS username TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS password_hash TEXT;
 
--- ============================================
--- CREATE USER BOARD PROGRESS TABLE
--- ============================================
-CREATE TABLE IF NOT EXISTS user_board_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    board_id UUID NOT NULL REFERENCES bingo_boards(id) ON DELETE CASCADE,
-    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
-    submission_id UUID NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
-    completed_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, board_id, activity_id)  -- User can only complete each activity once per board
-);
+-- Remove email/name fields (no longer used)
+ALTER TABLE profiles DROP COLUMN IF EXISTS email;
+ALTER TABLE profiles DROP COLUMN IF EXISTS name;
+
+-- Unique index for usernames
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_username_unique ON profiles(username);
 
 -- ============================================
 -- CREATE INDEXES FOR PERFORMANCE
 -- ============================================
-CREATE INDEX IF NOT EXISTS idx_bingo_boards_active ON bingo_boards(is_active);
-CREATE INDEX IF NOT EXISTS idx_board_activities_board ON bingo_board_activities(board_id);
-CREATE INDEX IF NOT EXISTS idx_board_activities_position ON bingo_board_activities(board_id, position);
-CREATE INDEX IF NOT EXISTS idx_user_progress_user ON user_board_progress(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_progress_board ON user_board_progress(board_id);
-CREATE INDEX IF NOT EXISTS idx_user_progress_user_board ON user_board_progress(user_id, board_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_user_activity ON submissions(user_id, activity_id);
 
+-- ============================================
+-- CREATE USER BOARD ACTIVITIES TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS user_board_activities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+    position INTEGER NOT NULL CHECK (position >= 0 AND position < 25),
+    UNIQUE(user_id, position)
+);
+
+-- Allow duplicate activities on a user's board (fallback when unique activities are exhausted)
+ALTER TABLE user_board_activities
+    DROP CONSTRAINT IF EXISTS uq_user_board_activity;
+
+CREATE INDEX IF NOT EXISTS idx_user_board_activities_user ON user_board_activities(user_id);
+
 -- Performance indexes for activities table
-CREATE INDEX IF NOT EXISTS idx_activities_index ON activities(index) WHERE index IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);
 -- Single-column index on activity_id for submission lookups by activity
 CREATE INDEX IF NOT EXISTS idx_submissions_activity_id ON submissions(activity_id);
 -- Unique constraint to prevent duplicate submissions (race condition guard)
-ALTER TABLE submissions ADD CONSTRAINT IF NOT EXISTS uq_submission_user_activity
-    UNIQUE (user_id, activity_id);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uq_submission_user_activity'
+    ) THEN
+        ALTER TABLE submissions
+            ADD CONSTRAINT uq_submission_user_activity UNIQUE (user_id, activity_id);
+    END IF;
+END $$;
 -- Drop status column if it exists (no longer used)
 ALTER TABLE submissions DROP COLUMN IF EXISTS status;
 
@@ -65,40 +62,8 @@ ALTER TABLE submissions ALTER COLUMN image_url DROP NOT NULL;
 -- Drop image_url column (no longer used)
 ALTER TABLE submissions DROP COLUMN IF EXISTS image_url;
 
--- ============================================
--- ADD COMMENTS FOR DOCUMENTATION
--- ============================================
-COMMENT ON TABLE bingo_boards IS 'Stores different bingo board configurations with 25 activities each';
-COMMENT ON TABLE bingo_board_activities IS 'Links activities to specific positions on bingo boards (0-24)';
-COMMENT ON TABLE user_board_progress IS 'Tracks which activities users have completed on each board';
+-- Add text response support
+ALTER TABLE activities ADD COLUMN IF NOT EXISTS "isTextRequired" BOOLEAN DEFAULT FALSE;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS "textResponse" TEXT;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS "imageUrl" TEXT;
 
--- ============================================
--- SAMPLE DATA (OPTIONAL - Remove if not needed)
--- ============================================
--- Create a sample bingo board
--- Note: You need to have at least 25 activities in your activities table first
--- Uncomment the following lines and replace with actual activity IDs
-
-/*
-INSERT INTO bingo_boards (title, description) 
-VALUES ('First Bingo Challenge', 'Complete 25 fun activities to win!');
-
--- Get the board ID
-DO $$
-DECLARE
-    board_uuid UUID;
-    activity_ids UUID[];
-BEGIN
-    -- Get the board ID we just created
-    SELECT id INTO board_uuid FROM bingo_boards WHERE title = 'First Bingo Challenge';
-    
-    -- Get first 25 activity IDs
-    SELECT ARRAY(SELECT id FROM activities LIMIT 25) INTO activity_ids;
-    
-    -- Insert board activities for positions 0-24
-    FOR i IN 0..24 LOOP
-        INSERT INTO bingo_board_activities (board_id, activity_id, position)
-        VALUES (board_uuid, activity_ids[i+1], i);
-    END LOOP;
-END $$;
-*/

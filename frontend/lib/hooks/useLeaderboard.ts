@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { getTopUsers } from "@/lib/api";
+import { getTopUsers, getGlobalStats } from "@/lib/api";
 import type { LeaderboardEntry } from "@/lib/api/leaderboard";
 
 interface UseLeaderboardResult {
   entries: LeaderboardEntry[];
+  totalInterns: number;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
-export function useLeaderboard(limit: number = 5): UseLeaderboardResult {
+export function useLeaderboard(limit: number = 10): UseLeaderboardResult {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [totalInterns, setTotalInterns] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -23,13 +25,14 @@ export function useLeaderboard(limit: number = 5): UseLeaderboardResult {
     (async () => {
       setLoading(true);
       try {
-        const data = await getTopUsers(limit);
-        if (!cancelled) setEntries(data);
+        const [data, stats] = await Promise.all([getTopUsers(limit), getGlobalStats()]);
+        if (!cancelled) {
+          setEntries(data);
+          setTotalInterns(stats.total_users);
+        }
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to fetch leaderboard",
-          );
+          setError(err instanceof Error ? err.message : "Failed to fetch leaderboard");
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -41,5 +44,5 @@ export function useLeaderboard(limit: number = 5): UseLeaderboardResult {
     };
   }, [limit, tick]);
 
-  return { entries, loading, error, refetch };
+  return { entries, totalInterns, loading, error, refetch };
 }

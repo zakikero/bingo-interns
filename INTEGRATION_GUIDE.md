@@ -24,11 +24,10 @@ Frontend (Next.js/React) ← API Calls → Backend (FastAPI)
 ### Backend (`/backend`)
 
 - `app/main.py` - Serveur FastAPI principal
-- `app/routes/users.py` - Endpoints auth (register, get user)
-- `app/routes/boards.py` - Endpoints bingo board
+- `app/routes/users.py` - Endpoints auth (register, login, get user)
 - `app/routes/activities.py` - Endpoints activités et submissions
 - `app/routes/leaderboard.py` - Endpoints classement
-- `app/models/` - Modèles SQLModel (User, Activity, BingoBoard, etc.)
+- `app/models/` - Modèles SQLModel (User, Activity, UserBoardActivity)
 - `app/db/connection.py` - Connexion PostgreSQL
 - `requirements.txt` - Dépendances Python
 
@@ -85,7 +84,7 @@ cd frontend
 npm install
 
 # Les variables d'environnement sont déjà configurées en .env.local
-# (API pointe sur http://localhost:8000/api)
+# (API pointe sur http://localhost:8000)
 
 # Lancer le serveur de développement
 npm run dev
@@ -97,15 +96,15 @@ L'app tourne sur `http://localhost:3000`
 
 ### 1. **Register / Login**
 
-- L'utilisateur entre email/password
-- Appel API `POST /api/users/register`
-- Backend crée ou valide l'utilisateur en DB
+- L'utilisateur entre username/password
+- Appel API `POST /api/auth/register`
+- Backend crée l'utilisateur en DB
 - Frontend stocke `user.id` en localStorage
 - Redirection vers le board
 
 ### 2. **Voir le Board**
 
-- Frontend récupère le board depuis `/api/boards/{boardId}`
+- Frontend récupère le board depuis `/api/users/{user_id}/board`
 - Les 25 activités sont affichées avec symbole `Open`
 
 ### 3. **Compléter une activité**
@@ -129,15 +128,11 @@ L'app tourne sur `http://localhost:3000`
 
 ### Users
 
-- `POST /api/users/register` - Créer un utilisateur
+- `POST /api/auth/register` - Créer un utilisateur
+- `POST /api/auth/login` - Se connecter
 - `GET /api/users/{user_id}` - Récupérer un utilisateur
 - `GET /api/users` - Lister tous les utilisateurs
-
-### Boards
-
-- `GET /api/boards` - Lister les boards
-- `GET /api/boards/{board_id}` - Récupérer un board avec ses activités
-- `POST /api/boards` - Créer un board (25 activités)
+- `GET /api/users/{user_id}/board` - Récupérer le board personnalisé
 
 ### Activities
 
@@ -147,7 +142,7 @@ L'app tourne sur `http://localhost:3000`
 ### Submissions
 
 - `POST /api/submissions` - Soumettre une preuve pour une activité
-- `GET /api/submissions?user_id=...` - Récupérer les soumissions d'un user
+- `GET /api/submissions/user/{user_id}` - Récupérer les soumissions d'un user
 
 ### Leaderboard
 
@@ -159,9 +154,7 @@ L'app tourne sur `http://localhost:3000`
 ### Frontend (`.env.local`)
 
 ```
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
-NEXT_PUBLIC_SUPABASE_URL=(optionnel)
-NEXT_PUBLIC_SUPABASE_ANON_KEY=(optionnel)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ### Backend (`.env`)
@@ -170,6 +163,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=(optionnel)
 DATABASE_URL=postgresql://user:password@localhost/bingo_db
 # Ou pour Supabase:
 # DATABASE_URL=postgresql://(username):(password)@(host)/(database)
+
+# Optionnel: origines CORS séparées par des virgules
+CORS_ORIGINS=http://localhost:3000,https://your-domain.com
 ```
 
 ## Dépannage
@@ -182,7 +178,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 ### "CORS error" au login
 
 - S'assurer que le backend a CORS activé (activé par défaut dans main.py)
-- Vérifier que le Frontend appelle `http://localhost:8000/api`
+- Vérifier que le Frontend appelle `http://localhost:8000`
 
 ### "Database connection error"
 
@@ -196,7 +192,7 @@ DATABASE_URL=postgresql://user:password@localhost/bingo_db
 
 ## Prochaines étapes
 
-1. **Upload d'images** - Intégrer Supabase Storage pour `image_url`
+1. **Upload d'images** - Ajouter un stockage externe si nécessaire
 2. **Authentification robuste** - Ajouter JWT tokens
 3. **Validation des soumissions** - Créer panel admin pour approuver/rejeter
 4. **Classement en direct** - Sync du leaderboard en temps réel

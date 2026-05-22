@@ -9,24 +9,16 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import {
-  registerUser,
-  loginUser,
-  logoutUser,
-  resetPassword as resetPasswordApi,
-} from "@/lib/api";
+import { registerUser, loginUser, logoutUser } from "@/lib/api";
 import type { User } from "@/types";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   error: string | null;
-  successMessage: string | null;
-  register: (email: string, password: string, name?: string) => Promise<User>;
-  login: (email: string, password: string) => Promise<User>;
+  register: (username: string, password: string) => Promise<User>;
+  login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
   isLoggedIn: boolean;
 }
 
@@ -36,52 +28,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const storageKey = "bingo_user";
 
-  // On mount: read current Supabase session & subscribe to auth changes (ONCE)
+  // On mount: read user from localStorage
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email ?? "",
-          name: (data.user.user_metadata?.name as string) ?? undefined,
-        });
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      try {
+        setUser(JSON.parse(raw) as User);
+      } catch {
+        localStorage.removeItem(storageKey);
       }
-      setLoading(false);
-    });
-
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email ?? "",
-            name: (session.user.user_metadata?.name as string) ?? undefined,
-          });
-        } else {
-          setUser(null);
-        }
-      },
-    );
-
-    return () => {
-      subscription.subscription.unsubscribe();
-    };
+    }
+    setLoading(false);
   }, []);
 
   const register = useCallback(
-    async (email: string, password: string, name?: string): Promise<User> => {
+    async (username: string, password: string): Promise<User> => {
       setLoading(true);
       setError(null);
       try {
-        const newUser = await registerUser(email, password, name);
+        const newUser = await registerUser(username, password);
         setUser(newUser);
+        localStorage.setItem(storageKey, JSON.stringify(newUser));
         return newUser;
       } catch (err) {
         const message =
@@ -96,12 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(
-    async (email: string, password: string): Promise<User> => {
+    async (username: string, password: string): Promise<User> => {
       setLoading(true);
       setError(null);
       try {
-        const loggedInUser = await loginUser(email, password);
+        const loggedInUser = await loginUser(username, password);
         setUser(loggedInUser);
+        localStorage.setItem(storageKey, JSON.stringify(loggedInUser));
         return loggedInUser;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Login failed";
@@ -114,23 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const resetPassword = useCallback(async (email: string): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    setSuccessMessage(null);
-    try {
-      await resetPasswordApi(email);
-      setSuccessMessage("Password reset email sent! Check your inbox.");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to send reset email";
-      setError(message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const logout = useCallback(async (): Promise<void> => {
     try {
       await logoutUser();
@@ -138,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // best-effort
     }
     setUser(null);
+    localStorage.removeItem(storageKey);
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -145,23 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       error,
-      successMessage,
       register,
       login,
       logout,
-      resetPassword,
       isLoggedIn: !!user,
     }),
-    [
-      user,
-      loading,
-      error,
-      successMessage,
-      register,
-      login,
-      logout,
-      resetPassword,
-    ],
+    [user, loading, error, register, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,7 +3,12 @@ import { submitActivity as apiSubmit, getUserSubmissions } from "@/lib/api";
 import type { Submission } from "@/types";
 
 interface UseSubmitActivityResult {
-  submit: (userId: string, activityId: string) => Promise<Submission>;
+  submit: (
+    userId: string,
+    activityId: string,
+    textResponse: string | null,
+    imageUrl: string | null,
+  ) => Promise<Submission>;
   loading: boolean;
   error: string | null;
 }
@@ -23,11 +28,18 @@ export function useSubmitActivity(): UseSubmitActivityResult {
   const submit = async (
     userId: string,
     activityId: string,
+    textResponse: string | null,
+    imageUrl: string | null,
   ): Promise<Submission> => {
     setLoading(true);
     setError(null);
     try {
-      const submission = await apiSubmit(userId, activityId);
+      const submission = await apiSubmit(
+        userId,
+        activityId,
+        textResponse,
+        imageUrl,
+      );
       return submission;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Submission failed";

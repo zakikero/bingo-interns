@@ -20,9 +20,8 @@ tags_metadata = [
     {
         "name": "users",
         "description": (
-            "Operations related to user profiles. "
-            "Handles synchronisation of Supabase-authenticated users into backend tables "
-            "and retrieval of profile information."
+            "Operations related to user profiles and authentication. "
+            "Handles username-based registration/login and profile retrieval."
         ),
     },
     {
@@ -49,7 +48,7 @@ app = FastAPI(
         "## Bingo Challenge Game API\n\n"
         "Backend REST API powering the Bingo intern challenge game.\n\n"
         "### Features\n"
-        "- **User sync** – keeps backend profiles in sync with Supabase Auth\n"
+        "- **Auth** – username/password registration and login\n"
         "- **Activities** – 25-cell bingo board challenges\n"
         "- **Submissions** – image-proof submissions for completed activities\n"
         "- **Leaderboard** – real-time ranking by completed activities and per-board rankings\n\n"
@@ -71,16 +70,43 @@ _default_origins = [
     "http://127.0.0.1:3000", "http://127.0.0.1:3001",
     "https://bingointerns.onrender.com",
 ]
-_cors_origins_env = os.getenv("CORS_ORIGINS", "")
-cors_origins = (
-    [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
-    if _cors_origins_env
-    else _default_origins
+_cors_origins_env = os.getenv("CORS_ORIGINS") or os.getenv("CORS_ORGINS", "")
+
+def _parse_bool(value: str, default: bool) -> bool:
+    if value is None:
+        return default
+    v = value.strip().lower()
+    if v in {"1", "true", "yes", "y", "on"}:
+        return True
+    if v in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
+
+
+def _normalize_origin(origin: str) -> str:
+    # Keep scheme+host(+port). Remove trailing slash for consistency.
+    return origin.strip().rstrip("/")
+
+
+_env_origins = [_normalize_origin(o) for o in _cors_origins_env.split(",") if o.strip()]
+if _env_origins:
+    cors_origins = list(dict.fromkeys(_default_origins + _env_origins))
+else:
+    cors_origins = _default_origins
+
+cors_allow_credentials = _parse_bool(
+    os.getenv("CORS_ALLOW_CREDENTIALS", "true"),
+    default=True,
 )
+
+# Wildcard + credentials is not allowed by browsers.
+if "*" in cors_origins:
+    cors_origins = ["*"]
+    cors_allow_credentials = False
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=True,
+    allow_credentials=cors_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )

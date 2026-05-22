@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select, func
 from app.models.user import Profile
 from app.models.activity import Submission, Activity
-from app.models.bingo_board import BingoBoard, UserBoardProgress
 from app.db.connection import get_session
 import uuid as uuid_pkg
 from typing import List
@@ -13,6 +12,16 @@ router = APIRouter()
 
 # ── Simple in-memory TTL cache for read-heavy endpoints ──
 _cache: dict[str, tuple[float, object]] = {}
+
+
+def invalidate_leaderboard_cache() -> None:
+    """Invalidate all cached leaderboard/stats results.
+
+    The leaderboard endpoints use an in-memory TTL cache for read-heavy traffic.
+    When submissions are created, we must invalidate this cache so callers can
+    see updated ranks immediately.
+    """
+    _cache.clear()
 
 def _get_cached(key: str, ttl: float):
     """Return cached value if still valid, else None."""
@@ -34,7 +43,7 @@ class LeaderboardEntry(BaseModel):
 
 class UserStats(BaseModel):
     user_id: uuid_pkg.UUID
-    email: str
+    username: str
     completed_activities: int
 
 
@@ -62,12 +71,12 @@ def get_top_users(
     statement = (
         select(
             Profile.id,
-            Profile.name,
+            Profile.username,
             func.count(Submission.id).label("completed_activities"),
             func.max(Submission.created_at).label("last_submission_at"),
         )
         .join(Submission, Profile.id == Submission.user_id)
-        .group_by(Profile.id, Profile.name)
+        .group_by(Profile.id, Profile.username)
         .order_by(
             func.count(Submission.id).desc(),
             func.max(Submission.created_at).asc(),
@@ -88,55 +97,6 @@ def get_top_users(
     ]
     
     _set_cached(cache_key, leaderboard)
-    return leaderboard
-
-
-@router.get(
-    "/leaderboard/board/{board_id}",
-    response_model=List[LeaderboardEntry],
-    summary="Leaderboard for a specific board",
-    description=(
-        "Returns the top users ranked by completed activities **only** on the specified bingo board.\n\n"
-        "Use the `limit` query parameter to control how many entries to return (default **5**). "
-        "Returns an empty list if the board does not exist."
-    ),
-    response_description="Ranked list of top users for the given board",
-)
-def get_board_leaderboard(
-    board_id: uuid_pkg.UUID,
-    limit: int = 5,
-    session: Session = Depends(get_session)
-):
-    # Verify board exists
-    board = session.get(BingoBoard, board_id)
-    if not board:
-        return []
-    
-    statement = (
-        select(
-            Profile.id,
-            Profile.email,
-            func.count(UserBoardProgress.id).label("completed_activities")
-        )
-        .join(UserBoardProgress, Profile.id == UserBoardProgress.user_id)
-        .where(UserBoardProgress.board_id == board_id)
-        .group_by(Profile.id, Profile.email)
-        .order_by(func.count(UserBoardProgress.id).desc())
-        .limit(limit)
-    )
-    
-    results = session.exec(statement).all()
-    
-    leaderboard = [
-        LeaderboardEntry(
-            user_id=user_id,
-            name=email,
-            completed_activities=completed_activities or 0,
-            rank=idx + 1
-        )
-        for idx, (user_id, email, completed_activities) in enumerate(results)
-    ]
-    
     return leaderboard
 
 
@@ -175,7 +135,7 @@ def get_user_stats(user_id: uuid_pkg.UUID, session: Session = Depends(get_sessio
     
     return UserStats(
         user_id=user_id,
-        email=user.email,
+        username=user.username,
         completed_activities=int(completed_activities)
     )
 
