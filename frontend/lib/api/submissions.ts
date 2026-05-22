@@ -3,7 +3,7 @@
  */
 
 import type { Submission } from "@/types";
-import { supabase } from "../supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
