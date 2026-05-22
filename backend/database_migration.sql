@@ -65,4 +65,5 @@ ALTER TABLE submissions DROP COLUMN IF EXISTS image_url;
 -- Add text response support
 ALTER TABLE activities ADD COLUMN IF NOT EXISTS "isTextRequired" BOOLEAN DEFAULT FALSE;
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS "textResponse" TEXT;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS "imageUrl" TEXT;
 

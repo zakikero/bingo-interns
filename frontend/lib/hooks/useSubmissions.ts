@@ -7,6 +7,7 @@ interface UseSubmitActivityResult {
     userId: string,
     activityId: string,
     textResponse: string | null,
+    imageUrl: string | null,
   ) => Promise<Submission>;
   loading: boolean;
   error: string | null;
@@ -28,11 +29,17 @@ export function useSubmitActivity(): UseSubmitActivityResult {
     userId: string,
     activityId: string,
     textResponse: string | null,
+    imageUrl: string | null,
   ): Promise<Submission> => {
     setLoading(true);
     setError(null);
     try {
-      const submission = await apiSubmit(userId, activityId, textResponse);
+      const submission = await apiSubmit(
+        userId,
+        activityId,
+        textResponse,
+        imageUrl,
+      );
       return submission;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Submission failed";

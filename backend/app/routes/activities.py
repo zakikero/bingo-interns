@@ -127,9 +127,14 @@ def create_submission(submission_data: SubmissionCreate, session: Session = Depe
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Text response must be {MAX_TEXT_LENGTH} characters or fewer"
         )
+
+    image_url = submission_data.imageUrl
+    if image_url is not None:
+        image_url = image_url.strip() or None
     
     submission_payload = submission_data.model_dump()
     submission_payload["textResponse"] = text_response
+    submission_payload["imageUrl"] = image_url
     new_submission = Submission(**submission_payload)
     session.add(new_submission)
     session.commit()
@@ -158,6 +163,7 @@ def get_user_submissions(
     statement = (
         select(Submission)
         .where(Submission.user_id == user_id)
+        .order_by(Submission.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
@@ -182,6 +188,7 @@ def get_activity_submissions(
     statement = (
         select(Submission)
         .where(Submission.activity_id == activity_id)
+        .order_by(Submission.created_at.desc())
         .offset(skip)
         .limit(limit)
     )

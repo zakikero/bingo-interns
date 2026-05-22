@@ -23,5 +23,6 @@ export interface Submission {
   user_id: string;
   activity_id: string;
   textResponse?: string | null;
+  imageUrl?: string | null;
   created_at?: string;
 }
