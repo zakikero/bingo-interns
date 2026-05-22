@@ -44,12 +44,14 @@ class Submission(SQLModel, table=True):
     user_id: uuid_pkg.UUID = Field(foreign_key="profiles.id")
     activity_id: uuid_pkg.UUID = Field(foreign_key="activities.id", index=True)
     textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None
 
 
 class SubmissionCreate(SQLModel):
     user_id: uuid_pkg.UUID
     activity_id: uuid_pkg.UUID
     textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None
 
 
 class SubmissionResponse(SQLModel):
@@ -58,3 +60,4 @@ class SubmissionResponse(SQLModel):
     user_id: uuid_pkg.UUID
     activity_id: uuid_pkg.UUID
     textResponse: Optional[str] = None
+    imageUrl: Optional[str] = None

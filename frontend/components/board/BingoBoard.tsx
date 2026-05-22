@@ -23,7 +23,6 @@ export default function BingoBoard() {
     activities: boardActivities,
     loading: boardLoading,
     error: boardError,
-    refetch: refetchBoard,
   } = useUserBoard(user?.id ?? null);
 
   const [error, setError] = useState<string | null>(null);
@@ -97,15 +96,15 @@ export default function BingoBoard() {
       setOptimisticIds((prev) => new Set(prev).add(activityId));
 
       try {
+        let imageUrl: string | null = null;
         if (image) {
           const { uploadSubmissionImage } =
             await import("@/lib/api/submissions");
-          await uploadSubmissionImage(user.id, activityId, image);
+          imageUrl = await uploadSubmissionImage(user.id, activityId, image);
         }
 
-        await submit(user.id, activityId, textResponse);
+        await submit(user.id, activityId, textResponse, imageUrl);
         refetchSubmissions();
-        refetchBoard();
         window.dispatchEvent(new Event("submission-completed"));
       } catch (err) {
         setOptimisticIds((prev) => {
@@ -116,7 +115,7 @@ export default function BingoBoard() {
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     },
-    [user, submit, refetchSubmissions, refetchBoard],
+    [user, submit, refetchSubmissions],
   );
 
   return (

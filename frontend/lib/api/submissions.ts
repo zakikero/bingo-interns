@@ -38,6 +38,7 @@ export async function submitActivity(
   userId: string,
   activityId: string,
   textResponse: string | null = null,
+  imageUrl: string | null = null,
 ): Promise<Submission> {
   const response = await fetch(`${API_BASE_URL}/api/submissions`, {
     method: "POST",
@@ -46,6 +47,7 @@ export async function submitActivity(
       user_id: userId,
       activity_id: activityId,
       textResponse,
+      imageUrl,
     }),
   });
 
