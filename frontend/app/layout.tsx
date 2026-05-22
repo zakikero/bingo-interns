@@ -6,11 +6,21 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 export const metadata = {
   title: "Fika Bingo",
   description: "Fika Bingo Event",
+  icons: {
+    icon: "/assets/fika-cake1.png",
+    apple: "/assets/fika-cake1.png",
+    shortcut: "/assets/fika-cake1.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/assets/fika-cake1.png" />
+        <link rel="shortcut icon" href="/assets/fika-cake1.png" />
+        <link rel="apple-touch-icon" href="/assets/fika-cake1.png" />
+      </head>
       <body>
         <AuthProvider>
           <ErrorBoundary>
